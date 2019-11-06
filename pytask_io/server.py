@@ -1,7 +1,8 @@
 import asyncio
 import logging
-from typing import Any, Callable, Union
+from typing import Any, Callable, Union, List
 import time
+
 
 
 class _Config:
@@ -27,56 +28,46 @@ class PyTaskIO:
     def __init__(self):
         self.log = _Log(logging, "INFO")
 
-    def _create_task(self, fnc: Union):
-        """
-        :param fnc: Coroutine to run
-        :return:
-        """
-        task = asyncio.create_task(
-            fnc,
-        )
-        self.log.info("task dispatched.")
-        return task
-
-    def on_task_complete(self, task_id=None):
-        """
-        :param task_id:
-        :return:
-        """
-        result = None
-        return result
-
-    def on_task_error(self):
-        pass
-
-    def start(self):
-        """
-        Starts the asynio event loop
-        :return:
-        """
-        self.log.info("is running.")
-        asyncio.run()
-
-    async def dispatch_task(self, fnc: Callable):
-        result = await self._create_task()
-        self.log.info("All tasks completed.")
-        return result
-
 
 if __name__ == "__main__":
 
-    async def test_one(msg):
-        return msg
 
-    py_task_io = PyTaskIO()
-    py_task_io.start()
+    loop = asyncio.new_event_loop()
+    # attach new loop the event loop's policy's watcher
+    asyncio.set_event_loop(loop)
 
-    task1 = py_task_io.dispatch_task(test_one, "TEST1")
-    print(f"result ------> {task1}")
+    def create_tasks(user_tasks: List):
+        for fnc, args in user_tasks:
+            async def _task(args):
+                return fnc(args)
+            loop.create_task(_task(args))
 
-    # res = py_task_io.on_task_complete(task1)
 
-    # print(f"result ------> {res}")
+    def test_one(msg: str):
+        time.sleep(5)
+        print(msg)
 
-    #  py_task_io.on_task_complete()
+    def test_two(msg: str):
+        time.sleep(1)
+        print(msg)
+
+    create_tasks([
+        (test_one, "Hello Joe 1!!!!"),
+        (test_two, "Hello Joe 2!!!!")
+    ])
+
+
+
+
+    # loop.create_task(test_one("Hello Joe!"))
+    # loop.create_task(test_two("Hello Joe 2!"))
+
+    try:
+        loop.run_forever()
+        print("----------> run_forever()")
+    finally:
+        print("----------> close()")
+        loop.close()
+
+
 
