@@ -2,7 +2,14 @@
 
 Asynchronous Tasks Library using asyncio
 
+Work in progress .. please come back soon!
+
 ![PyTask IO](assets/Group.png?raw=true "Title")
+
+## Install
+```bash
+pip install pytask-io
+```
 
 ## Authors
 

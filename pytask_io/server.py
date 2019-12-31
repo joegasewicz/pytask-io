@@ -56,17 +56,9 @@ if __name__ == "__main__":
         (test_two, "Hello Joe 2!!!!")
     ])
 
-
-
-
-    # loop.create_task(test_one("Hello Joe!"))
-    # loop.create_task(test_two("Hello Joe 2!"))
-
     try:
         loop.run_forever()
-        print("----------> run_forever()")
     finally:
-        print("----------> close()")
         loop.close()
 
 
