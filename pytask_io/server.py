@@ -4,7 +4,6 @@ from typing import Any, Callable, Union, List
 import time
 
 
-
 class _Config:
     def __init__(self):
         pass
