@@ -37,17 +37,21 @@ class Invoker:
             command.execute()
 
 
-"""
-    Concrete Commands
-"""
 class AbstractTask(ABC):
+
+    progress: int
 
     @abstractmethod
     def run(self) -> None:
         pass
 
 
-class SuccessCommand(AbstractCommand):
+"""
+    Concrete Commands
+"""
+
+
+class RunCommand(AbstractCommand):
 
     def __init__(self, task: AbstractTask):  # pass reciever commands here
         self.task = task
@@ -56,24 +60,37 @@ class SuccessCommand(AbstractCommand):
         self.task.run()
 
 
+class ProgressCommand(AbstractCommand):
+
+    def __init__(self, task: AbstractTask):  # pass reciever commands here
+        self.task = task
+
+    def execute(self) -> None:
+        self.task.progress += 1
+        print(f"Progress is ----> {self.task.progress}")
+
+
 class LongTask(AbstractTask):
     """Request"""
+
+    progress: int = 0
+
     def run(self) -> None:
         print("long task running ------> ")
 
-
+"""
+    Clientz
+"""
 long_task = LongTask()
-success_command = SuccessCommand(long_task)
+run_command = RunCommand(long_task)
+progress_command = ProgressCommand(long_task)
 
 queue = []
 
 invoker = Invoker(queue)
-invoker.set_command(success_command)
+invoker.set_command(run_command)
+invoker.set_command(progress_command)
 invoker.run()
-
-
-
-
 
 
 
