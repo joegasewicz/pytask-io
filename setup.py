@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 setup(
     name="pytask-io",
     version="0.0.1",
-    description="An asynchronous mail server",
+    description="An asynchronous Tasks Library using asyncio",
     packages=['pytask_io'],
     classifiers=[
         "Programming Language :: Python :: 3",
