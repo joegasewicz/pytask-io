@@ -24,7 +24,6 @@ class AbstractCommand(ABC):
 
 class Invoker:
     """Mediator / Invoker"""
-
     _queue: List[AbstractCommand]
 
     def __init__(self, queue: List[AbstractCommand]):
@@ -45,7 +44,6 @@ class AbstractTask(ABC):
     def run(self) -> None:
         pass
 
-
 """
     Concrete Commands
 """
@@ -57,10 +55,12 @@ class RunCommand(AbstractCommand):
         self.task = task
 
     async def execute(self) -> None:
-        print("long task starting ------> ")
+        print("RUN_CMD starting ------> ")
+        self.task.progress += 1
+        print(f"Progress is ----> {self.task.progress}")
         self.task.run()
         await asyncio.sleep(3)
-        print("long task completed ------> ")
+        print("RUN_CMD completed ------> ")
 
 
 class ProgressCommand(AbstractCommand):
@@ -69,10 +69,10 @@ class ProgressCommand(AbstractCommand):
         self.task = task
 
     async def execute(self) -> None:
-        print("long task starting ------> ")
+        print("PROGRESS_CMD starting ------> ")
         self.task.progress += 1
         await asyncio.sleep(1)
-        print("long task completed ------> ")
+        print("PROGRESS_CMD completed ------> ")
         print(f"Progress is ----> {self.task.progress}")
 
 
