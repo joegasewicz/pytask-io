@@ -11,29 +11,30 @@
 #         return list.__getitem__(self, item)
 
 from abc import ABC, abstractmethod
-from typing import Any, List
+from typing import Any, List, Tuple, Callable
 import asyncio
+import time
 
 
 class AbstractCommand(ABC):
 
     @abstractmethod
-    def execute(self) -> None:
+    def execute(self, args=None) -> None:
         pass
 
 
 class Invoker:
     """Mediator / Invoker"""
-    _queue: List[AbstractCommand]
+    _queue: List[Tuple[AbstractCommand, Any]]
 
-    def __init__(self, queue: List[AbstractCommand]):
+    def __init__(self, queue: List[Tuple[AbstractCommand, Any]]):
         self._queue = queue
 
-    def set_command(self, command: AbstractCommand) -> None:
-        self._queue.append(command)
+    def set_command(self, command: AbstractCommand, args=None) -> None:
+        self._queue.append((command, args))
 
     async def run(self) -> None:
-        await asyncio.gather(*(command.execute() for command in self._queue))
+        await asyncio.gather(*(command[0].execute(command[1]) for command in self._queue))
 
 
 class AbstractTask(ABC):
@@ -41,7 +42,7 @@ class AbstractTask(ABC):
     progress: int
 
     @abstractmethod
-    def run(self) -> None:
+    def run(self, result: Any) -> None:
         pass
 
 """
@@ -54,12 +55,16 @@ class RunCommand(AbstractCommand):
     def __init__(self, task: AbstractTask):  # pass reciever commands here
         self.task = task
 
-    async def execute(self) -> None:
+    async def execute(self, args=None) -> None:
+        fnc = args
+        """
+        Execute the task now
+        """
+        result = await fnc()
         print("RUN_CMD starting ------> ")
         self.task.progress += 1
         print(f"Progress is ----> {self.task.progress}")
-        self.task.run()
-        await asyncio.sleep(3)
+        self.task.run(result)
         print("RUN_CMD completed ------> ")
 
 
@@ -68,7 +73,7 @@ class ProgressCommand(AbstractCommand):
     def __init__(self, task: AbstractTask):  # pass reciever commands here
         self.task = task
 
-    async def execute(self) -> None:
+    async def execute(self, args=None) -> None:
         print("PROGRESS_CMD starting ------> ")
         self.task.progress += 1
         await asyncio.sleep(1)
@@ -81,8 +86,9 @@ class LongTask(AbstractTask):
 
     progress: int = 0
 
-    def run(self) -> None:
-        pass
+    def run(self, result: Any) -> None:
+        print(f"LONG TASK RESULT ------> {result}")
+
 
 """
     Task
@@ -91,7 +97,7 @@ class LongTask(AbstractTask):
 
 class PyTaskIO:
 
-    _queue: List[AbstractCommand]
+    _queue: List[Tuple[AbstractCommand, Any]]
 
     long_task: AbstractTask = LongTask()
 
@@ -106,15 +112,25 @@ class PyTaskIO:
 
         self._queue = []
 
-    def run_task(self):
+    def run_task(self, task_fn: Any):
+        """
+        Init user task and add response to a queue ...?
+        Maybe the run command can start the st
+        """
         invoker = Invoker(self._queue)
-        invoker.set_command(self.run_command)
+        invoker.set_command(self.run_command, task_fn)
         invoker.set_command(self.progress_command)
         asyncio.run(invoker.run())
 
 
 py_task = PyTaskIO()
-py_task.run_task()
 
+# py_task.run_task()
 
+def send_email():
+    time.sleep(2)
+    return "EMAIL RESPONSE <-------"
 
+print("sending email ------> ")
+py_task.run_task(send_email)
+print("email sent <----------")
