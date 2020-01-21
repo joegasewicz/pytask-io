@@ -79,19 +79,35 @@ class LongTask(AbstractTask):
         print("long task running ------> ")
 
 """
-    Clientz
+    Task
 """
-long_task = LongTask()
-run_command = RunCommand(long_task)
-progress_command = ProgressCommand(long_task)
 
-queue = []
+class PyTaskIO:
 
-invoker = Invoker(queue)
-invoker.set_command(run_command)
-invoker.set_command(progress_command)
-invoker.run()
+    _queue: List[AbstractCommand]
 
+    long_task: AbstractTask = LongTask()
+
+    run_command: AbstractCommand
+
+    progress_command: AbstractCommand
+
+    """Task set up"""
+    def __init__(self):
+        self.run_command = RunCommand(self.long_task)
+        self.progress_command = ProgressCommand(self.long_task)
+
+        self._queue = []
+
+    def run_task(self):
+        invoker = Invoker(self._queue)
+        invoker.set_command(self.run_command)
+        invoker.set_command(self.progress_command)
+        invoker.run()
+
+
+py_task = PyTaskIO()
+py_task.run_task()
 
 
 
