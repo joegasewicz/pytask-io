@@ -12,6 +12,7 @@
 
 from abc import ABC, abstractmethod
 from typing import Any, List
+import asyncio
 
 
 class AbstractCommand(ABC):
@@ -32,9 +33,8 @@ class Invoker:
     def set_command(self, command: AbstractCommand) -> None:
         self._queue.append(command)
 
-    def run(self) -> None:
-        for command in self._queue:
-            command.execute()
+    async def run(self) -> None:
+        await asyncio.gather(*(command.execute() for command in self._queue))
 
 
 class AbstractTask(ABC):
@@ -56,8 +56,11 @@ class RunCommand(AbstractCommand):
     def __init__(self, task: AbstractTask):  # pass reciever commands here
         self.task = task
 
-    def execute(self) -> None:
+    async def execute(self) -> None:
+        print("long task starting ------> ")
         self.task.run()
+        await asyncio.sleep(3)
+        print("long task completed ------> ")
 
 
 class ProgressCommand(AbstractCommand):
@@ -65,8 +68,11 @@ class ProgressCommand(AbstractCommand):
     def __init__(self, task: AbstractTask):  # pass reciever commands here
         self.task = task
 
-    def execute(self) -> None:
+    async def execute(self) -> None:
+        print("long task starting ------> ")
         self.task.progress += 1
+        await asyncio.sleep(1)
+        print("long task completed ------> ")
         print(f"Progress is ----> {self.task.progress}")
 
 
@@ -76,11 +82,12 @@ class LongTask(AbstractTask):
     progress: int = 0
 
     def run(self) -> None:
-        print("long task running ------> ")
+        pass
 
 """
     Task
 """
+
 
 class PyTaskIO:
 
@@ -103,7 +110,7 @@ class PyTaskIO:
         invoker = Invoker(self._queue)
         invoker.set_command(self.run_command)
         invoker.set_command(self.progress_command)
-        invoker.run()
+        asyncio.run(invoker.run())
 
 
 py_task = PyTaskIO()
