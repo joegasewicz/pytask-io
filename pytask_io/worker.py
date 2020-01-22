@@ -25,7 +25,7 @@ async def worker_three(queue: asyncio.Queue):
     queue.task_done()
 
 
-async def main():
+async def Queue():
 
     # ----- Queue ------
     queue = asyncio.Queue()
@@ -68,4 +68,4 @@ async def main():
     await asyncio.gather(task_one, task_two, task_three)
     print("QUEUE COMPLETE")
 
-asyncio.run(main(), debug=True)
+asyncio.run(Queue(), debug=True)

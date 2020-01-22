@@ -60,7 +60,7 @@ class RunCommand(AbstractCommand):
         """
         Execute the task now
         """
-        result = await fnc()
+        result = fnc()
         print("RUN_CMD starting ------> ")
         self.task.progress += 1
         print(f"Progress is ----> {self.task.progress}")
@@ -89,11 +89,9 @@ class LongTask(AbstractTask):
     def run(self, result: Any) -> None:
         print(f"LONG TASK RESULT ------> {result}")
 
-
 """
     Task
 """
-
 
 class PyTaskIO:
 
