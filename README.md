@@ -11,6 +11,9 @@ Work in progress .. please come back soon!
 pip install pytask-io
 ```
 
+
+### Initial design
+![PyTask IO](assets/design.png?raw=true "Title")
 ## Authors
 
 * **joegasewicz** - *Initial work* - [@joegasewicz](https://twitter.com/joegasewicz)
