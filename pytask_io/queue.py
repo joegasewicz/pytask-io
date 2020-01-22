@@ -51,8 +51,10 @@ async def producer(queue: asyncio.Queue):
 
 
 async def consumer(queue: asyncio.Queue):
-    queue.task_done()
-    return queue
+    while True:
+        # queue.task_done()
+        print("here------> ")
+        return queue
 
 
 async def queue():
@@ -78,7 +80,7 @@ async def queue():
             lambda worker: pipe(
                 queue,
                 worker,
-                # consumer,
+                consumer,
                 asyncio.create_task,
             )
         )
