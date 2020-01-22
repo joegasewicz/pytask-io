@@ -3,10 +3,14 @@ from toolz.functoolz import pipe, compose, curry
 
 
 async def worker_one(queue: asyncio.Queue):
+    print("here-------> ITEM")
+    print("Worker: 1")
     result = await queue.get()
     await asyncio.sleep(3)
     print("Worker: 1")
     print(result())
+    queue.task_done()
+    return queue
 
 
 async def worker_two(queue: asyncio.Queue):
@@ -14,6 +18,8 @@ async def worker_two(queue: asyncio.Queue):
     await asyncio.sleep(1)
     print("Worker: 2")
     print(result())
+    queue.task_done()
+    return queue
 
 
 async def worker_three(queue: asyncio.Queue):
@@ -21,6 +27,8 @@ async def worker_three(queue: asyncio.Queue):
     await asyncio.sleep(1)
     print("Worker: 3")
     print(result())
+    queue.task_done()
+    return queue
 
 def test_fnc_one():
     return f"1 ------>>>> "
@@ -44,6 +52,7 @@ async def producer(queue: asyncio.Queue):
 
 async def consumer(queue: asyncio.Queue):
     queue.task_done()
+    return queue
 
 
 async def queue():
@@ -56,36 +65,39 @@ async def queue():
 
     # --- worker tasks to process the queue concurrently
 
-    items = [
+    workers = [
         worker_one,
         worker_two,
         worker_three,
         worker_two
     ]
 
-    # task_one = compose(
-    #     asyncio.create_task,
-    #     consumer,
-    #     worker_one,
-    # )(queue)
-
-    all_tasks = compose(curry(map)(
-        lambda worker: pipe(
-            queue,
-            worker,
-            consumer,
-            asyncio.create_task,
+    all_tasks = compose(
+        list,
+        curry(map)(
+            lambda worker: pipe(
+                queue,
+                worker,
+                # consumer,
+                asyncio.create_task,
+            )
         )
-    ))(items)
+    )(workers)
 
     # wait until queue is fully processed
     # TODO Consumer here ---->
+
     await queue.join()
 
     # Cancel all worker tasks.
     compose(
-        curry(map),
-        lambda t: t.cancel(),
+        list,
+        curry(map)(
+            lambda task: pipe(
+                task,
+                lambda ta: ta.cancel(),
+            )
+        ),
     )(all_tasks)
 
     # wait until all worker tasks are cancelled

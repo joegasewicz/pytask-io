@@ -2,6 +2,7 @@ import asyncio
 
 
 async def worker_one(queue: asyncio.Queue):
+    print("HERE_____________HEREREEEEEE")
     result = await queue.get()
     await asyncio.sleep(3)
     print("Worker: 1")
@@ -31,6 +32,7 @@ async def Queue():
     queue = asyncio.Queue()
 
     def test_fnc_one():
+        print("HERE_____________Zzzzzzz")
         return f"1 ------>>>> "
 
     def test_fnc_two():
@@ -49,6 +51,7 @@ async def Queue():
 
     # --- worker tasks to process the queue concurrently
     # TODO Producer here ------>
+    print("HERE_____________1")
     task_one = asyncio.create_task(worker_one(queue))
     task_two = asyncio.create_task(worker_two(queue))
     task_three = asyncio.create_task(worker_three(queue))
@@ -56,7 +59,9 @@ async def Queue():
 
     # wait until queue is fully processed
     # TODO Consumer here ---->
+    print("HERE_____________2")
     await queue.join()
+    print("HERE_____________END")
 
     # Cancel all worker tasks.
     task_one.cancel()
