@@ -1,109 +1,81 @@
 import asyncio
 from toolz.functoolz import pipe, compose, curry
+from typing import List, Any
+import time
 
 
-async def worker_one(queue: asyncio.Queue):
-    print("here-------> ITEM")
-    print("Worker: 1")
-    result = await queue.get()
-    await asyncio.sleep(3)
-    print("Worker: 1")
-    print(result())
-    queue.task_done()
-    return queue
+def test_fnc_one(arg):
+    time.sleep(1)
+    return arg
 
 
-async def worker_two(queue: asyncio.Queue):
-    result = await queue.get()
-    await asyncio.sleep(1)
-    print("Worker: 2")
-    print(result())
-    queue.task_done()
-    return queue
+def test_fnc_two(arg):
+    time.sleep(1)
+    return arg
 
 
-async def worker_three(queue: asyncio.Queue):
-    result = await queue.get()
-    await asyncio.sleep(1)
-    print("Worker: 3")
-    print(result())
-    queue.task_done()
-    return queue
-
-def test_fnc_one():
-    return f"1 ------>>>> "
-
-def test_fnc_two():
-    return f"2 ------>>>> "
-
-def test_fnc_three():
-    return f"3 ------>>>> "
-
-def test_fnc_four():
-    return f"4 ------>>>> "
+def test_fnc_three(arg):
+    time.sleep(2)
+    return arg
 
 
-async def producer(queue: asyncio.Queue):
-    queue.put_nowait(test_fnc_one)
-    queue.put_nowait(test_fnc_two)
-    queue.put_nowait(test_fnc_three)
-    queue.put_nowait(test_fnc_four)
+def test_fnc_four(arg):
+    time.sleep(1)
+    return arg
 
 
-async def consumer(queue: asyncio.Queue):
+async def produce(queue: asyncio.Queue, items: List[Any]):
+    for item in items:
+        fnc, args = item
+        coroutine_from_item = asyncio.coroutine(fnc)
+        item = asyncio.create_task(coroutine_from_item(args))
+        await queue.put(item)
+
+
+async def consume(queue: asyncio.Queue):
     while True:
-        # queue.task_done()
-        print("here------> ")
-        return queue
+        result = await queue.get()
+        result = await result
+        print(f"here-------> {result}")
+        queue.task_done()
 
 
-async def queue():
+async def main():
 
     # ----- Queue ------
     queue = asyncio.Queue()
 
-    # Producer adds items to the queue
-    await producer(queue)
-
-    # --- worker tasks to process the queue concurrently
-
-    workers = [
-        worker_one,
-        worker_two,
-        worker_three,
-        worker_two
+    items = [
+        (test_fnc_one, "function 1"),
+        (test_fnc_two, "function21"),
+        (test_fnc_three, "function 3"),
+        (test_fnc_four, "function 4")
     ]
 
-    all_tasks = compose(
+    items_list = [items, items, items]
+
+    producers = compose(
         list,
         curry(map)(
-            lambda worker: pipe(
-                queue,
-                worker,
-                consumer,
-                asyncio.create_task,
+            lambda item: pipe(
+                item,
+                lambda i: asyncio.create_task(produce(queue, i))
             )
         )
-    )(workers)
+    )(items_list)
 
-    # wait until queue is fully processed
-    # TODO Consumer here ---->
+    consumer = asyncio.ensure_future(consume(queue))
+
+    # Get tasks from queue & Gather to run tasks concurrently
+
+    await asyncio.gather(*producers)
 
     await queue.join()
 
-    # Cancel all worker tasks.
-    compose(
-        list,
-        curry(map)(
-            lambda task: pipe(
-                task,
-                lambda ta: ta.cancel(),
-            )
-        ),
-    )(all_tasks)
+    consumer.cancel()
 
-    # wait until all worker tasks are cancelled
-    await asyncio.gather(*all_tasks)
     print("QUEUE COMPLETE")
 
-asyncio.run(queue(), debug=True)
+loop = asyncio.get_event_loop()
+loop.run_until_complete(main())
+loop.close()
