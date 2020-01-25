@@ -1,14 +1,20 @@
 import asyncio
 import pytest
 
-from pytask_io.pytask_io import PytaskIO
+from pytask_io.pytask_io import PyTaskIO
+from tests.mock_uow import send_email
 
 
-class TestPytaskIO:
+class TestPyTaskIO:
 
-    def test_pytask_io(self):
-        """Test the PytaskIO class"""
+    def test_add_unit_of_work(self):
 
-        pytask_io = PytaskIO()
+        pytask_io = PyTaskIO()
+        result = pytask_io.add_unit_of_work(send_email, "Hello world!", 1)
 
-        assert asyncio.get_running_loop() == True
+        assert result is True
+
+        # Test if the uow is on the queue
+        # Test if the uow is on the store
+
+        # assert asyncio.get_running_loop() == True
