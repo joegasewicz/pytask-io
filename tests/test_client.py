@@ -5,6 +5,6 @@ from tests.mock_uow import send_email
 units_of_work = [send_email]
 
 
-def test_client():
-    result = client(units_of_work)
-    assert result == {}
+# def test_client():
+# #     result = client()
+# #     assert result == {}

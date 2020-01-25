@@ -14,7 +14,7 @@ class PyTaskIO:
     def __init__(self, *args, **kwargs):
         self.init_app()
 
-    def add_unit_of_work(self, unit_of_work, *args):
+    def add_unit_of_work(self, unit_of_work, *args) -> None:
         """
         Adds units of work to the queue client
         :param unit_of_work: A callable / executable Python function
@@ -29,4 +29,4 @@ class PyTaskIO:
         self.queue_client = create_task_queue()
 
     def run_event_loop(self):
-        asyncio.run(client(self.units_of_work))
+        asyncio.run(client())

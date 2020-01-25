@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-async def client(work_units: List[Callable]):
+async def client():
     """
         Client for Workers, Tasks & AsyncIO's Event Loop
     """
