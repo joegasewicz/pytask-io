@@ -1,10 +1,15 @@
 import asyncio
 from typing import List, Callable
 import redis
+import time
 
 from pytask_io.client import client
 from pytask_io.task_queue import create_task_queue, serialize_unit_of_work
+from pytask_io.logger import logger
 
+def send_email(arg1: str, arg2: int):
+    time.sleep(1)
+    return [arg1, arg2]
 
 class PyTaskIO:
 
@@ -25,8 +30,13 @@ class PyTaskIO:
         self.queue_client.lpush("tasks", dumped_uow)
 
     def init_app(self):
-        self.run_event_loop()
         self.queue_client = create_task_queue()
+        self.run_event_loop()
 
     def run_event_loop(self):
-        asyncio.run(client())
+        current_loop = asyncio.get_event_loop()
+        current_loop.create_task(client(self.queue_client))
+        current_loop.run_forever()
+
+
+        logger.info("asyncIO event loop running")

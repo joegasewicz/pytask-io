@@ -35,3 +35,4 @@ class TestPyTaskIO:
         # Test if the uow is on the store
 
         # assert asyncio.get_running_loop() == True
+
