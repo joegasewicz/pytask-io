@@ -1,8 +1,7 @@
 import asyncio
 import redis
-import marshal
-import base64
-from typing import Callable, List, Any
+import dill
+from typing import Callable, List, Any, Tuple
 
 # --------------------------------------
 #    Public functions
@@ -17,15 +16,15 @@ def create_task_queue(host: str = "localhost", port: int = 6379, db: int = 0) ->
     )
 
 
-def serialize_unit_of_work(unit_of_work: Callable, *args):
-    function_str = marshal.dumps(unit_of_work)
-    args_str = marshal.dumps(*args)
-    json = {
-        "function": function_str,
-        "args": args_str,
-    }
-
-    return json
+def serialize_unit_of_work(unit_of_work: Callable, *args) -> bytes:
+    """
+    Serializes a unit of work & returns the results
+    :param unit_of_work:s
+    :param args:
+    :return:
+    """
+    serialized_uow = dill.dumps((unit_of_work, [*args]))
+    return serialized_uow
 
 
 # --------------------------------------
