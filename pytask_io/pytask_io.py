@@ -19,7 +19,6 @@ class PyTaskIO:
 
 
 
-
     def init_app(self):
         self.run_event_loop()
         self.queue_client = create_task_queue()
