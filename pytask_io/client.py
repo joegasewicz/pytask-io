@@ -9,6 +9,7 @@ from typing import List, Any, Dict, Tuple, Callable, Awaitable
 from pytask_io.worker_queue import create_worker_queue
 from pytask_io.event_loop import event_loop
 from pytask_io.logger import logger
+from pytask_io.worker import worker
 
 
 async def get_task_from_queue_client(q: redis.Redis) -> Tuple[Callable, List]:  # TODO correct return type
@@ -37,16 +38,28 @@ async def client(queue_client: redis.Redis):
     queue = create_worker_queue()
 
     next_task = await get_task_from_queue_client(queue_client)
-    logger.info(f"FINAL----> {next_task}")
+
     executable_uow, uow_args = await deserialize_task(next_task[1])
 
-    logger.info(f"executable_uow----> {executable_uow}")
-    logger.info(f"uow_args----> {uow_args}")
+    unit_of_work = {
+        "function": executable_uow,
+        "args": uow_args,
+    }
 
-    # Serialize units of work (UOW)
+    # Push unit of work into the asyncio queue
+    queue.put_nowait(unit_of_work)
 
-    # Push UOW into task queue
+    # Create `3` workers tasks to process the queue concurrently
+    tasks = []
+    for i in range(3):
+        task = asyncio.create_task(worker(queue))
+        tasks.append(task)
+    # Wait until queue is fully processed
+    await queue.join()
 
-    # Get units of work from Redis Store
+    # Cancel tasks
+    for task in tasks:
+        task.cancel()
 
-    # Deserialize UOW
+    # Wait until all worker tasks are cancelled
+    await asyncio.gather(*tasks, return_exceptions=True)
