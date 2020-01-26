@@ -34,7 +34,6 @@ async def client(queue_client: redis.Redis):
     """
         Client for Workers, Tasks & AsyncIO's Event Loop
     """
-
     queue = create_worker_queue()
 
     next_task = await get_task_from_queue_client(queue_client)
