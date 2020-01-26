@@ -8,9 +8,11 @@ from pytask_io.client import client
 from pytask_io.task_queue import create_task_queue, serialize_unit_of_work
 from pytask_io.logger import logger
 
+
 def send_email(arg1: str, arg2: int):
     time.sleep(1)
     return [arg1, arg2]
+
 
 class PyTaskIO:
 
