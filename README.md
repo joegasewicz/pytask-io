@@ -2,15 +2,36 @@
 
 Asynchronous Tasks Library using asyncio
 
-Library nearly completed...
+An Asyncio based task queue that is designed to be super easy the use!
 
 ![PyTask IO](assets/Group.png?raw=true "Title")
 
 ## Install
 ```bash
 pip install pytask-io
+
+docker run redis
+
 ```
 
+
+
+### Usage
+
+``python
+    # Starts the task runner
+    pytask = PytaskIO()
+    
+    # Handle a long running process, in this case a send email function
+    store_id = pytask.add_task(send_email, title, body)
+    
+    # Try once to get the results of youre email sometime in the future
+    result = get_task(task_id) # returns either the result or false
+    
+    # Or poll for the results
+    result = poll_for_task_results(task_id, tries=100, interval=5, interval_type="minutes")
+    
+```
 
 ### Initial design
 ![PyTask IO](assets/design.png?raw=true "Title")
