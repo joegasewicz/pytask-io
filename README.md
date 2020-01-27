@@ -27,6 +27,9 @@ docker run redis
         db=0,
     )
     
+    # Start the PytaskIO task queue on a separate thread.
+    pytask.run()
+    
     # Handle a long running process, in this case a send email function
     task_id = pytask.add_task(send_email, title, body)
     
