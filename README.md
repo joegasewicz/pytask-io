@@ -23,7 +23,8 @@ docker run redis
     pytask = PytaskIO(
         store_port=8080,
         store_host="localhost",
-        broker="rabbitmq"  # coming soon!
+        broker="redis",  # rabbitmq coming soon...
+        db=0,
     )
     
     # Handle a long running process, in this case a send email function
