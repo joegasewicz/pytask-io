@@ -3,7 +3,7 @@ import pytest
 import redis
 
 from pytask_io.task_queue import serialize_unit_of_work, create_task_queue
-from pytask_io.client import client
+from pytask_io.client import client, deserialize_task
 from tests.mock_uow import send_email
 from tests.fixtures import event_loop
 
@@ -25,7 +25,7 @@ class TestPyTaskIO:
 
     def teardown_method(self):
         """Flush all from the store"""
-        r.flushall()
+        # r.flushall()
 
     def test_add_unit_of_work(self):
 
@@ -39,13 +39,25 @@ class TestPyTaskIO:
         # Test if the uow is on the store
 
         # assert asyncio.get_running_loop() == True
-    @pytest.mark.y
+
+
     def test_init(self, event_loop):
         dumped_uow = serialize_unit_of_work(send_email, "Hello", 1)
         r.lpush("tasks", dumped_uow)
-        r.lpush("tasks", dumped_uow)
-        r.lpush("tasks", dumped_uow)
-
         queue_client = create_task_queue()
 
-        assert {} == event_loop.run_until_complete(client(queue_client))
+        results = r.brpop("tasks")
+        event_loop.run_until_complete(client(queue_client))
+
+        fnc, args = event_loop.run_until_complete(deserialize_task(results[1]))
+        assert ["Hello", 1] == fnc(*args)
+
+
+    @pytest.mark.y
+    def test_add_task(self):
+        py_task = PyTaskIO()
+        expected = {
+            "list": "tasks",
+            "index": 1,
+        }
+        assert expected == py_task.add_task(send_email, "Hello", 1)

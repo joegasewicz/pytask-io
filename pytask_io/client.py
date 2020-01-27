@@ -37,7 +37,6 @@ async def client(queue_client: redis.Redis):
     queue = create_worker_queue()
 
     next_task = await get_task_from_queue_client(queue_client)
-
     executable_uow, uow_args = await deserialize_task(next_task[1])
 
     unit_of_work = {

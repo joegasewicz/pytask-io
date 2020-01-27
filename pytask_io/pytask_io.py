@@ -3,6 +3,7 @@ from typing import List, Callable
 import redis
 import time
 from threading import Thread
+from typing import Dict, Any
 
 from pytask_io.client import client
 from pytask_io.task_queue import create_task_queue, serialize_unit_of_work
@@ -23,7 +24,7 @@ class PyTaskIO:
     def __init__(self, *args, **kwargs):
         self.init_app()
 
-    def _add_unit_of_work(self, unit_of_work, *args) -> None:
+    def _add_unit_of_work(self, unit_of_work, *args) -> int:
         """
         Adds units of work to the queue client
         :param unit_of_work: A callable / executable Python function
@@ -31,7 +32,7 @@ class PyTaskIO:
         :return:
         """
         dumped_uow = serialize_unit_of_work(unit_of_work, *args)
-        self.queue_client.lpush("tasks", dumped_uow)
+        return self.queue_client.lpush("tasks", dumped_uow)
 
     def init_app(self):
         self.queue_client = create_task_queue()
@@ -43,6 +44,11 @@ class PyTaskIO:
         current_loop.run_forever()
         logger.info("asyncIO event loop running")
 
-    def add_task(self, unit_of_work, *args):
-        pass
+    def add_task(self, unit_of_work, *args) -> Dict[str, Any]:
+        uow = self._add_unit_of_work(unit_of_work, *args)
+        return {
+            "list": "tasks",
+            "index": uow,
+        }
+
 
