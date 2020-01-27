@@ -51,4 +51,10 @@ class PyTaskIO:
             "index": uow,
         }
 
+    def get_task(self):
+        """try once to get task"""
+
+    def poll_for_task(self, tries: int, interval: int):
+        """poll for task based on tries & interval"""
+
 
