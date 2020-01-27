@@ -18,7 +18,7 @@ docker run redis
 
 ### Usage
 
-``python
+```python
     # Starts the task runner
     pytask = PytaskIO()
     
