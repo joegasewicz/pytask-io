@@ -20,7 +20,11 @@ docker run redis
 
 ```python
     # Starts the task runner
-    pytask = PytaskIO()
+    pytask = PytaskIO(
+        store_port=8080,
+        store_host="localhost",
+        broker="rabbitmq"  # coming soon!
+    )
     
     # Handle a long running process, in this case a send email function
     task_id = pytask.add_task(send_email, title, body)
