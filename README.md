@@ -2,7 +2,7 @@
 
 Asynchronous Tasks Library using asyncio
 
-Work in progress .. please come back soon!
+Library nearly completed...
 
 ![PyTask IO](assets/Group.png?raw=true "Title")
 
