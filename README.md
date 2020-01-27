@@ -25,7 +25,7 @@ docker run redis
     # Handle a long running process, in this case a send email function
     task_id = pytask.add_task(send_email, title, body)
     
-    # Try once to get the results of youre email sometime in the future
+    # Try once to get the results of your email sometime in the future
     result = get_task(task_id) # returns either the result or false
     
     # Or poll for the results
