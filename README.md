@@ -23,7 +23,7 @@ docker run redis
     pytask = PytaskIO()
     
     # Handle a long running process, in this case a send email function
-    store_id = pytask.add_task(send_email, title, body)
+    task_id = pytask.add_task(send_email, title, body)
     
     # Try once to get the results of youre email sometime in the future
     result = get_task(task_id) # returns either the result or false
