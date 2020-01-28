@@ -3,10 +3,14 @@ from typing import List, Callable
 import redis
 import time
 from threading import Thread
-from typing import Dict, Any
+from typing import Dict, Any, Union
 
 from pytask_io.client import client
-from pytask_io.task_queue import create_task_queue, serialize_unit_of_work
+from pytask_io.task_queue import (
+    create_task_queue,
+    serialize_unit_of_work,
+    pole_for_store_results,
+)
 from pytask_io.logger import logger
 
 
@@ -20,6 +24,9 @@ class PyTaskIO:
     units_of_work: List[Callable]
     queue_client: redis.Redis
     loop_thread: Thread
+    pole_thread: Thread
+    pole_loop: asyncio.AbstractEventLoop
+    task_results: str = "task_results"
 
     def __init__(self, *args, **kwargs):
         self.init_app()
@@ -37,6 +44,7 @@ class PyTaskIO:
     def init_app(self):
         self.queue_client = create_task_queue()
         self.loop_thread = Thread(target=self.run_event_loop, daemon=True)
+        self.loop_thread.start()
 
     def run_event_loop(self):
         current_loop = asyncio.get_event_loop()
@@ -47,14 +55,34 @@ class PyTaskIO:
     def add_task(self, unit_of_work, *args) -> Dict[str, Any]:
         uow = self._add_unit_of_work(unit_of_work, *args)
         return {
-            "list": "tasks",
-            "index": uow,
+            "list_name": "tasks",
+            "task_index": uow,
         }
 
-    def get_task(self):
-        """try once to get task"""
+    def get_task(self, task_meta: Dict[str, Any]) -> Union[Dict[str, Any], bool]:
+        """
+        :param task_meta: Dict[str, Any] -
+        :return Union[Dict, bool]: The result is non blocking
+        """
+        result = self.queue_client.lpop("task_results")
+        return result
 
-    def poll_for_task(self, tries: int, interval: int):
-        """poll for task based on tries & interval"""
+    def poll_for_task(self, task_meta: Dict, *args, **kwargs) -> Union[Dict[str, Any], bool]:
+        """
+        - Create a new thread with an event loop
+        """
+        tries = kwargs.get("tries")
+        interval = kwargs.get("interval")
 
+        if tries:
+            # Create event loop in new thread
+            self.pole_loop = asyncio.new_event_loop()
+            # Coroutine to pole store on event loop
+            get_store_results = pole_for_store_results(self.queue_client, task_meta, interval, tries)
 
+            def pole_loop_callback():
+                asyncio.set_event_loop(self.pole_loop)
+                self.pole_loop.run_until_complete(get_store_results)
+
+            pole_thread = self.pole_thread = Thread(target=pole_loop_callback, daemon=True)
+            pole_thread.start()
