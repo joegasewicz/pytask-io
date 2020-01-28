@@ -6,6 +6,8 @@ from pytask_io.task_queue import serialize_unit_of_work, create_task_queue
 from pytask_io.client import client, deserialize_task
 from tests.mock_uow import send_email
 from tests.fixtures import event_loop
+from pytask_io.pytask_io import PyTaskIO
+from tests.mock_uow import send_email
 
 
 r = redis.Redis(
@@ -14,8 +16,7 @@ r = redis.Redis(
     db=0,
 )
 
-from pytask_io.pytask_io import PyTaskIO
-from tests.mock_uow import send_email
+
 
 
 class TestPyTaskIO:
@@ -25,7 +26,7 @@ class TestPyTaskIO:
 
     def teardown_method(self):
         """Flush all from the store"""
-        r.flushall()
+        # r.flushall()
 
     def test_add_unit_of_work(self):
 
@@ -39,6 +40,7 @@ class TestPyTaskIO:
         # Test if the uow is on the store
 
         # assert asyncio.get_running_loop() == True
+
 
     def test_init(self, event_loop):
         dumped_uow = serialize_unit_of_work(send_email, "Hello", 1)
@@ -58,3 +60,15 @@ class TestPyTaskIO:
             "task_index": 1,
         }
         assert expected == py_task.add_task(send_email, "Hello", 1)
+
+    @pytest.mark.e
+    def test_poll_for_task(self):
+        dumped_uow = serialize_unit_of_work(send_email, "Hello", 1)
+        r.lpush("tasks", dumped_uow)
+
+        pytask = PyTaskIO()
+        task_meta = {
+            "list_name": "tasks",
+            "task_index": 1,
+        }
+        assert pytask.poll_for_task(task_meta, tries=1, interval=1) == {}
