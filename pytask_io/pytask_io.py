@@ -90,7 +90,8 @@ class PyTaskIO:
             self.polled_result = self.pole_loop.run_until_complete(get_store_results)
         if self.polled_result:
             task_result_data = {
-                "task_result": self.polled_result,
+                "data": self.polled_result,
                 **task_meta,
             }
+            print("end -----> ")
             return task_result_data

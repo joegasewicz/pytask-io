@@ -1,8 +1,9 @@
 import asyncio
 import pytest
 import redis
+import pickle
 
-from pytask_io.task_queue import serialize_unit_of_work, create_task_queue
+from pytask_io.task_queue import serialize_unit_of_work, create_task_queue, serialize_store_data
 from pytask_io.client import client, deserialize_task
 from tests.mock_uow import send_email
 from tests.fixtures import event_loop
@@ -63,12 +64,23 @@ class TestPyTaskIO:
 
     @pytest.mark.e
     def test_poll_for_task(self):
-        dumped_uow = serialize_unit_of_work(send_email, "Hello", 1)
-        r.lpush("tasks", dumped_uow)
+        data = {
+            "value_1": 1,
+            "values_2": "hello"
+        }
+
+        dumped_data = serialize_store_data(data)
+        r.lpush("task_result", dumped_data)
+
+        expected = {
+            "data": data,
+            "list_name": "task_result",
+            "task_index": 0,
+        }
 
         pytask = PyTaskIO()
         task_meta = {
-            "list_name": "tasks",
-            "task_index": 1,
+            "list_name1": "task_result",
+            "task_index": 0,
         }
-        assert pytask.poll_for_task(task_meta, tries=1, interval=1) == {}
+        assert pytask.poll_for_task(task_meta, tries=1, interval=1) == expected

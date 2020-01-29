@@ -2,6 +2,7 @@ import asyncio
 import logging
 import redis
 import dill
+import json
 from toolz.functoolz import compose, curry, pipe
 from typing import List, Any, Dict, Tuple, Callable, Awaitable
 
@@ -28,6 +29,18 @@ async def deserialize_task(task_data: Any):
         raise RuntimeError(f"PyTaskIO: {err}")
     result = await current_loop.run_in_executor(None, dill.loads, task_data)
     return result
+
+
+async def deserialize_store_data(task_data: Any):
+    try:
+        current_loop = asyncio.get_running_loop()
+    except RuntimeError as err:
+        raise RuntimeError(f"PyTaskIO: {err}")
+    if task_data:
+        result = await current_loop.run_in_executor(None, dill.loads, task_data)
+        return result
+    else:
+        return None
 
 
 async def client(queue_client: redis.Redis):
