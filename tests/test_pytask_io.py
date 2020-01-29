@@ -27,7 +27,10 @@ class TestPyTaskIO:
 
     def teardown_method(self):
         """Flush all from the store"""
-        # r.flushall()
+        r.flushall()
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            loop.close()
 
     def test_add_unit_of_work(self):
 

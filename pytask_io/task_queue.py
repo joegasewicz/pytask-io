@@ -69,4 +69,5 @@ async def pole_for_store_results(queue_client: redis.Redis, task_meta: Dict, tri
                 break
             else:
                 await asyncio.sleep(interval)
+
     return dumped

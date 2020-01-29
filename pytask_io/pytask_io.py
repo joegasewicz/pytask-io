@@ -83,7 +83,7 @@ class PyTaskIO:
         interval = kwargs.get("interval")
         if tries:
             # Create event loop in new thread
-            self.pole_loop = asyncio.new_event_loop()
+            self.pole_loop = asyncio.get_event_loop()
             # Coroutine to pole store on event loop
             get_store_results = pole_for_store_results(self.queue_client, task_meta, interval, tries)
             asyncio.set_event_loop(self.pole_loop)
