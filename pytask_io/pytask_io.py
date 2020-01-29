@@ -93,5 +93,4 @@ class PyTaskIO:
                 "data": self.polled_result,
                 **task_meta,
             }
-            print("end -----> ")
             return task_result_data

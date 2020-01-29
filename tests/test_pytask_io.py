@@ -80,7 +80,7 @@ class TestPyTaskIO:
 
         pytask = PyTaskIO()
         task_meta = {
-            "list_name1": "task_result",
+            "list_name": "task_result",
             "task_index": 0,
         }
         assert pytask.poll_for_task(task_meta, tries=1, interval=1) == expected

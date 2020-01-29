@@ -58,13 +58,12 @@ async def pole_for_store_results(queue_client: redis.Redis, task_meta: Dict, tri
     dumped = None
     if interval:
         while tries > 0:
-            print(f"loop ----> {tries}")
             current_loop = asyncio.get_running_loop()
+
             result = await current_loop.run_in_executor(None, queue_client.lindex, *[list_name, task_index])
             if result:
                 dumped = await deserialize_store_data(result)
                 tries -= 1
-                print(f"loop ----> {tries}")
                 break
             elif not result:
                 break
