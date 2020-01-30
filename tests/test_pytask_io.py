@@ -3,7 +3,7 @@ import pytest
 import redis
 import pickle
 
-from pytask_io.task_queue import serialize_unit_of_work, create_task_queue, serialize_store_data
+from pytask_io.task_queue import serialize_unit_of_work, connect_to_store, serialize_store_data
 from pytask_io.client import client, deserialize_task
 from tests.mock_uow import send_email
 from tests.fixtures import event_loop
@@ -49,7 +49,7 @@ class TestPyTaskIO:
     def test_init(self, event_loop):
         dumped_uow = serialize_unit_of_work(send_email, "Hello", 1)
         r.lpush("tasks", dumped_uow)
-        queue_client = create_task_queue()
+        queue_client = connect_to_store()
 
         results = r.brpop("tasks")
         event_loop.run_until_complete(client(queue_client))
@@ -64,6 +64,7 @@ class TestPyTaskIO:
             "task_index": 1,
         }
         assert expected == py_task.add_task(send_email, "Hello", 1)
+
 
     @pytest.mark.e
     def test_poll_for_task(self):

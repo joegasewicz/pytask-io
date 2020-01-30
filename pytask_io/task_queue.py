@@ -7,19 +7,12 @@ from typing import Callable, List, Any, Tuple, Dict
 import threading
 
 from pytask_io.client import deserialize_task, deserialize_store_data
+from pytask_io.pytask_io import connect_to_store
 from pytask_io.logger import logger
 
 # --------------------------------------
 #    Public functions
 # --------------------------------------
-
-
-def create_task_queue(host: str = "localhost", port: int = 6379, db: int = 0) -> redis.Redis:
-    return redis.Redis(
-        host=host,
-        port=port,
-        db=db,
-    )
 
 
 def serialize_unit_of_work(unit_of_work: Any, *args) -> bytes:
@@ -60,7 +53,7 @@ async def pole_for_store_results(queue_client: redis.Redis, task_meta: Dict, tri
         while tries > 0:
             current_loop = asyncio.get_running_loop()
 
-            result = await current_loop.run_in_executor(None, queue_client.lindex, *[list_name, task_index])
+            result = await current_loop.run_in_executor(None, connect_to_store.lindex, *[list_name, task_index])
             if result:
                 dumped = await deserialize_store_data(result)
                 tries -= 1

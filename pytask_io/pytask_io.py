@@ -6,13 +6,20 @@ from threading import Thread
 from typing import Dict, Any, Union
 import threading
 
-from pytask_io.client import client
 from pytask_io.task_queue import (
-    create_task_queue,
     serialize_unit_of_work,
     pole_for_store_results,
 )
 from pytask_io.logger import logger
+from pytask_io.client import client
+
+
+def connect_to_store(host: str = "localhost", port: int = 6379, db: int = 0) -> redis.Redis:
+    return redis.Redis(
+        host=host,
+        port=port,
+        db=db,
+    )
 
 
 def send_email(arg1: str, arg2: int):
@@ -23,7 +30,8 @@ def send_email(arg1: str, arg2: int):
 class PyTaskIO:
 
     units_of_work: List[Callable]
-    queue_client: redis.Redis
+    queue_client: redis.Redis = connect_to_store()
+    queue_store: redis.Redis = connect_to_store()
     loop_thread: Thread
     main_loop: asyncio.AbstractEventLoop
     pole_loop: asyncio.AbstractEventLoop
@@ -44,7 +52,6 @@ class PyTaskIO:
         return self.queue_client.lpush("tasks", dumped_uow)
 
     def init_app(self):
-        self.queue_client = create_task_queue()
         self.loop_thread = Thread(target=self.run_event_loop, daemon=True)
         self.loop_thread.start()
 
