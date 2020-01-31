@@ -4,12 +4,9 @@
 import time
 
 
-def send_email(arg1: str, arg2: int):
-    time.sleep(1)
-    return {
-        "key_1": arg1,
-        "key_2": arg2,
-    }
+def send_email(arg1: str):
+    print(f"FUNCTION EXECUTED!")
+    return arg1
 
 """
 

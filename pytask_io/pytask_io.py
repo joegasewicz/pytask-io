@@ -4,14 +4,13 @@ import redis
 import time
 from threading import Thread
 from typing import Dict, Any, Union
-import threading
 
 from pytask_io.task_queue import (
-    serialize_unit_of_work,
     pole_for_store_results,
 )
 from pytask_io.logger import logger
 from pytask_io.client import client
+from pytask_io.utils import serialize_unit_of_work
 
 
 def connect_to_store(host: str = "localhost", port: int = 6379, db: int = 0) -> redis.Redis:

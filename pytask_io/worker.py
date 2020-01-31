@@ -1,8 +1,8 @@
 import asyncio
 from typing import List, Callable
 
-from pytask_io.logger import logger
 from pytask_io.store import add_uof_result_to_store
+from pytask_io.utils import serialize_store_data
 
 tasks = []
 
@@ -25,10 +25,8 @@ async def worker(q: asyncio.Queue, queue_client):
         args = executable_uow["args"]
 
         current_loop = asyncio.get_running_loop()
-
         result = await current_loop.run_in_executor(None, fnc, *args)
-        print("HERE---------->>>>>", result)
         # Add results to store
 
-        await add_uof_result_to_store(queue_client, "task_result", result, )
+        await add_uof_result_to_store(queue_client, result)
         q.task_done()

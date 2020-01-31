@@ -1,12 +1,8 @@
-import asyncio
 import pytest
 import redis
-import pickle
 
-from pytask_io.task_queue import serialize_unit_of_work, serialize_store_data
-from pytask_io.client import client, deserialize_task
-from tests.mock_uow import send_email
-from tests.fixtures import event_loop
+from pytask_io.client import client
+from pytask_io.utils import deserialize_task, serialize_store_data, serialize_unit_of_work
 from pytask_io.pytask_io import PyTaskIO, connect_to_store
 from tests.mock_uow import send_email
 
@@ -16,8 +12,6 @@ r = redis.Redis(
     port=6379,
     db=0,
 )
-
-
 
 
 class TestPyTaskIO:
@@ -63,7 +57,7 @@ class TestPyTaskIO:
             "list_name": "tasks",
             "task_index": 2,
         }
-        assert expected == py_task.add_task(send_email, "Hello", 1)
+        assert expected == py_task.add_task(send_email, "Hello")
 
     def test_poll_for_task(self):
         data = {

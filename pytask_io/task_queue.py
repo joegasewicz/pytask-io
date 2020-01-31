@@ -6,35 +6,12 @@ import json
 from typing import Callable, List, Any, Tuple, Dict
 import threading
 
-from pytask_io.client import deserialize_task, deserialize_store_data
+from pytask_io.utils import deserialize_task, deserialize_store_data
 from pytask_io.logger import logger
 
 # --------------------------------------
 #    Public functions
 # --------------------------------------
-
-
-def serialize_unit_of_work(unit_of_work: Any, *args) -> bytes:
-    """
-    Serializes a unit of work & returns the results
-    :param unit_of_work:s
-    :param args:
-    :return:
-    """
-    serialized_uow = dill.dumps((unit_of_work, [*args]))
-    return serialized_uow
-
-
-def serialize_store_data(store_data: Any) -> bytes:
-    """
-    Serializes a unit of work & returns the results
-    :param unit_of_work:s
-    :param args:
-    :return:
-    """
-    serialized_uow = dill.dumps((store_data))
-    return serialized_uow
-
 
 async def pole_for_store_results(queue_store: redis.Redis, task_meta: Dict, tries: int, interval: int):
     """
