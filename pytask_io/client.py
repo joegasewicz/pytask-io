@@ -1,46 +1,10 @@
 import asyncio
-import logging
 import redis
-import dill
-import json
-from toolz.functoolz import compose, curry, pipe
-from typing import List, Any, Dict, Tuple, Callable, Awaitable
 
 
 from pytask_io.worker_queue import create_worker_queue
-from pytask_io.event_loop import event_loop
-from pytask_io.logger import logger
 from pytask_io.worker import worker
-
-
-async def get_task_from_queue_client(q: redis.Redis) -> Tuple[Callable, List]:  # TODO correct return type
-    try:
-        current_loop = asyncio.get_running_loop()
-    except RuntimeError as err:
-        raise RuntimeError(f"PyTaskIO: {err}")
-    result = await current_loop.run_in_executor(None, q.brpop, "tasks")
-    return result
-
-
-async def deserialize_task(task_data: Any):
-    try:
-        current_loop = asyncio.get_running_loop()
-    except RuntimeError as err:
-        raise RuntimeError(f"PyTaskIO: {err}")
-    result = await current_loop.run_in_executor(None, dill.loads, task_data)
-    return result
-
-
-async def deserialize_store_data(task_data: Any):
-    try:
-        current_loop = asyncio.get_running_loop()
-    except RuntimeError as err:
-        raise RuntimeError(f"PyTaskIO: {err}")
-    if task_data:
-        result = await current_loop.run_in_executor(None, dill.loads, task_data)
-        return result
-    else:
-        return None
+from pytask_io.utils import get_task_from_queue_client, deserialize_task
 
 
 async def client(queue_client: redis.Redis):
@@ -63,7 +27,7 @@ async def client(queue_client: redis.Redis):
     # Create `3` workers tasks to process the queue concurrently
     tasks = []
     for i in range(3):
-        task = asyncio.create_task(worker(queue))
+        task = asyncio.create_task(worker(queue, queue_client))
         tasks.append(task)
     # Wait until queue is fully processed
     await queue.join()
@@ -71,6 +35,5 @@ async def client(queue_client: redis.Redis):
     # Cancel tasks
     for task in tasks:
         task.cancel()
-
     # Wait until all worker tasks are cancelled
     await asyncio.gather(*tasks, return_exceptions=True)

@@ -4,15 +4,21 @@ import redis
 import time
 from threading import Thread
 from typing import Dict, Any, Union
-import threading
 
-from pytask_io.client import client
 from pytask_io.task_queue import (
-    create_task_queue,
-    serialize_unit_of_work,
     pole_for_store_results,
 )
 from pytask_io.logger import logger
+from pytask_io.client import client
+from pytask_io.store import init_unit_of_work
+
+
+def connect_to_store(host: str = "localhost", port: int = 6379, db: int = 0) -> redis.Redis:
+    return redis.Redis(
+        host=host,
+        port=port,
+        db=db,
+    )
 
 
 def send_email(arg1: str, arg2: int):
@@ -23,7 +29,8 @@ def send_email(arg1: str, arg2: int):
 class PyTaskIO:
 
     units_of_work: List[Callable]
-    queue_client: redis.Redis
+    queue_client: redis.Redis = connect_to_store()
+    queue_store: redis.Redis = connect_to_store()
     loop_thread: Thread
     main_loop: asyncio.AbstractEventLoop
     pole_loop: asyncio.AbstractEventLoop
@@ -33,19 +40,10 @@ class PyTaskIO:
     def __init__(self, *args, **kwargs):
         self.init_app()
 
-    def _add_unit_of_work(self, unit_of_work, *args) -> int:
-        """
-        Adds units of work to the queue client
-        :param unit_of_work: A callable / executable Python function
-        :param args: The list of arguments required by `unit_of_work`
-        :return:
-        """
-        dumped_uow = serialize_unit_of_work(unit_of_work, *args)
-        return self.queue_client.lpush("tasks", dumped_uow)
-
     def init_app(self):
-        self.queue_client = create_task_queue()
-        self.loop_thread = Thread(target=self.run_event_loop, daemon=True)
+        threads = []
+        self.loop_thread = Thread(name="event_loop", target=self.run_event_loop, daemon=True)
+        threads.append(self.loop_thread)
         self.loop_thread.start()
 
     def run_event_loop(self):
@@ -55,11 +53,13 @@ class PyTaskIO:
         logger.info("asyncIO event loop running")
 
     def add_task(self, unit_of_work, *args) -> Dict[str, Any]:
-        uow = self._add_unit_of_work(unit_of_work, *args)
-        return {
-            "list_name": "tasks",
-            "task_index": uow,
-        }
+        """
+        Adds units of work to the queue client
+        :param unit_of_work: A callable / executable Python function
+        :param args: The list of arguments required by `unit_of_work`
+        :return:
+        """
+        return init_unit_of_work(self.queue_client, unit_of_work, *args)
 
     def get_task(self, task_meta: Dict[str, Any]) -> Union[Dict[str, Any], bool]:
         """
@@ -85,7 +85,7 @@ class PyTaskIO:
             # Create event loop in new thread
             self.pole_loop = asyncio.get_event_loop()
             # Coroutine to pole store on event loop
-            get_store_results = pole_for_store_results(self.queue_client, task_meta, interval, tries)
+            get_store_results = pole_for_store_results(self.queue_store, task_meta, interval, tries)
             asyncio.set_event_loop(self.pole_loop)
             self.polled_result = self.pole_loop.run_until_complete(get_store_results)
         if self.polled_result:

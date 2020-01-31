@@ -1,7 +1,7 @@
 import pytest
 import dill
 
-from pytask_io.task_queue import serialize_unit_of_work
+from pytask_io.utils import serialize_unit_of_work
 from tests.mock_uow import send_email
 
 
