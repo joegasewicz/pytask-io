@@ -11,15 +11,16 @@ def connect_to_store(host: str = "localhost", port: int = 6379, db: int = 0) -> 
     )
 
 
-def set_cmds(key: str, value: Dict):
-    r = connect_to_store().queue_store
-    pipe = r.queue_store.pipeline()
-    return pipe.set(key, value).incr("auto_number").execute()
+async def set_cmds(queue_client, key: str, value: Dict):
+    q = asyncio.get_event_loop()
+    pipe = queue_client.pipeline()
+    result = pipe.set(key, value).incr("auto_number").execute()
+    test =  await q.run_in_executor(None, result)
+    print("TIIIII -----------> ", test)
+    return test
 
 
-async def add_uof_result_to_store(key: str, value: Dict):
+async def add_uof_result_to_store(queue_client, key: str, value: Dict):
     # If the store being used is redis:
-    event_loop = asyncio.get_event_loop()
-    result = await event_loop.run_in_executor(None, set_cmds, *(key, value))
-    print(f"set --------> {result}")
+    result = await set_cmds(queue_client, key, value)
     return result

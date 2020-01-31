@@ -63,7 +63,7 @@ async def client(queue_client: redis.Redis):
     # Create `3` workers tasks to process the queue concurrently
     tasks = []
     for i in range(3):
-        task = asyncio.create_task(worker(queue))
+        task = asyncio.create_task(worker(queue, queue_client))
         tasks.append(task)
     # Wait until queue is fully processed
     await queue.join()
@@ -71,6 +71,5 @@ async def client(queue_client: redis.Redis):
     # Cancel tasks
     for task in tasks:
         task.cancel()
-
     # Wait until all worker tasks are cancelled
     await asyncio.gather(*tasks, return_exceptions=True)

@@ -52,7 +52,9 @@ class PyTaskIO:
         return self.queue_client.lpush("tasks", dumped_uow)
 
     def init_app(self):
-        self.loop_thread = Thread(target=self.run_event_loop, daemon=True)
+        threads = []
+        self.loop_thread = Thread(name="event_loop", target=self.run_event_loop, daemon=True)
+        threads.append(self.loop_thread)
         self.loop_thread.start()
 
     def run_event_loop(self):
@@ -92,7 +94,7 @@ class PyTaskIO:
             # Create event loop in new thread
             self.pole_loop = asyncio.get_event_loop()
             # Coroutine to pole store on event loop
-            get_store_results = pole_for_store_results(self.queue_client, task_meta, interval, tries)
+            get_store_results = pole_for_store_results(self.queue_store, task_meta, interval, tries)
             asyncio.set_event_loop(self.pole_loop)
             self.polled_result = self.pole_loop.run_until_complete(get_store_results)
         if self.polled_result:
