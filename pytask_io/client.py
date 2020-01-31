@@ -1,16 +1,10 @@
 import asyncio
-import logging
 import redis
-import dill
-import json
-from toolz.functoolz import compose, curry, pipe
-from typing import List, Any, Dict, Tuple, Callable, Awaitable
 
 
 from pytask_io.worker_queue import create_worker_queue
 from pytask_io.worker import worker
 from pytask_io.utils import get_task_from_queue_client, deserialize_task
-
 
 
 async def client(queue_client: redis.Redis):

@@ -10,7 +10,7 @@ from pytask_io.task_queue import (
 )
 from pytask_io.logger import logger
 from pytask_io.client import client
-from pytask_io.utils import serialize_unit_of_work
+from pytask_io.store import init_unit_of_work
 
 
 def connect_to_store(host: str = "localhost", port: int = 6379, db: int = 0) -> redis.Redis:
@@ -40,16 +40,6 @@ class PyTaskIO:
     def __init__(self, *args, **kwargs):
         self.init_app()
 
-    def _add_unit_of_work(self, unit_of_work, *args) -> int:
-        """
-        Adds units of work to the queue client
-        :param unit_of_work: A callable / executable Python function
-        :param args: The list of arguments required by `unit_of_work`
-        :return:
-        """
-        dumped_uow = serialize_unit_of_work(unit_of_work, *args)
-        return self.queue_client.lpush("tasks", dumped_uow)
-
     def init_app(self):
         threads = []
         self.loop_thread = Thread(name="event_loop", target=self.run_event_loop, daemon=True)
@@ -63,11 +53,13 @@ class PyTaskIO:
         logger.info("asyncIO event loop running")
 
     def add_task(self, unit_of_work, *args) -> Dict[str, Any]:
-        uow = self._add_unit_of_work(unit_of_work, *args)
-        return {
-            "list_name": "tasks",
-            "task_index": uow,
-        }
+        """
+        Adds units of work to the queue client
+        :param unit_of_work: A callable / executable Python function
+        :param args: The list of arguments required by `unit_of_work`
+        :return:
+        """
+        return init_unit_of_work(self.queue_client, unit_of_work, *args)
 
     def get_task(self, task_meta: Dict[str, Any]) -> Union[Dict[str, Any], bool]:
         """

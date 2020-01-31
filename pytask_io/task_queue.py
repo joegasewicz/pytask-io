@@ -1,17 +1,10 @@
 import asyncio
 import redis
-import dill
-import pickle
-import json
-from typing import Callable, List, Any, Tuple, Dict
-import threading
+from typing import Dict
 
-from pytask_io.utils import deserialize_task, deserialize_store_data
-from pytask_io.logger import logger
 
-# --------------------------------------
-#    Public functions
-# --------------------------------------
+from pytask_io.utils import deserialize_store_data
+
 
 async def pole_for_store_results(queue_store: redis.Redis, task_meta: Dict, tries: int, interval: int):
     """

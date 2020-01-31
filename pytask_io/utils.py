@@ -5,6 +5,7 @@ import dill
 import json
 from toolz.functoolz import compose, curry, pipe
 from typing import List, Any, Dict, Tuple, Callable, Awaitable
+from datetime import datetime
 
 
 def serialize_unit_of_work(unit_of_work: Any, *args) -> bytes:
@@ -57,3 +58,8 @@ async def deserialize_store_data(task_data: Any):
         return result
     else:
         return None
+
+
+def get_datetime_now():
+    now = datetime.now()
+    return now.strftime("%d/%m/%y %H:%M:%S")
