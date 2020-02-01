@@ -108,7 +108,7 @@ def init_unit_of_work(q, unit_of_work, *args) -> Dict[str, Any]:
     return uow_metadata
 
 
-async def get_uow_from_store(uow_key: str):
+async def get_uow_from_store(uow_key: str) -> Dict[str, Any]:
     current_loop = asyncio.get_running_loop()
     result = await current_loop.run_in_executor(None, _store.get, uow_key)
     if not result:
@@ -120,7 +120,7 @@ async def get_uow_from_store(uow_key: str):
         return result
 
 
-async def add_uof_result_to_store(executed_uow: Any, uow_metadata: Dict[str, Any]):
+async def add_uof_result_to_store(executed_uow: Any, uow_metadata: Dict[str, Any]) -> None:
     now = get_datetime_now()
     # Serialize results
     serialized_exec_uow = serialize_store_data(executed_uow)
