@@ -57,7 +57,12 @@ class TestPyTaskIO:
             "list_name": "tasks",
             "task_index": 2,
         }
-        assert expected == py_task.add_task(send_email, "Hello")
+
+        result = py_task.add_task(send_email, "Hello")
+
+        print("here------> ", result)
+        assert isinstance(result["serialized_uow"], bytes)
+        assert False is True
 
     def test_poll_for_task(self):
         data = {

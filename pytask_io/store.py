@@ -37,7 +37,7 @@ def _create_uow_metadata(uow_store_name: str, index: int, datetime_now: Any, ser
         "store_updated": "None",
         "queue_type": "redis",
         "queue_name": _QUEUE_NAME,
-        "queue_index": "None",
+        "queue_length": "None",
         "queue_db": 0,
         "queue_created": "None",
         "queue_updated": "None",
@@ -99,9 +99,10 @@ def init_unit_of_work(q, unit_of_work, *args) -> Dict[str, Any]:
 
     # Unit of work gets push onto the task queue & metadata gets updated
     serialized_uow_meta = serialize_store_data(uow_metadata)
-    queue_index = q.lpush(_QUEUE_NAME, serialized_uow_meta)
+    # LPUSH returns the queue length after the push operation
+    queue_length = q.lpush(_QUEUE_NAME, serialized_uow_meta)
     uow_metadata["queue_created"] = get_datetime_now()
-    uow_metadata["queue_index"] = queue_index
+    uow_metadata["queue_length"] = queue_length
     # Returns metadata back to the caller / user.
     return uow_metadata
 
