@@ -3,7 +3,6 @@ import asyncio
 from typing import Any, Dict
 from functools import partial
 from pytask_io.logger import logger
-from toolz import pipe, compose
 
 from pytask_io.utils import serialize_store_data, get_datetime_now, serialize_unit_of_work
 
@@ -34,14 +33,16 @@ def _create_uow_metadata(uow_store_name: str, index: int, datetime_now: Any, ser
         "store_index": index,
         "store_db": 0,
         "store_created": datetime_now,
-        "store_updated": "None",
+        "store_updated": "",
         "queue_type": "redis",
         "queue_name": _QUEUE_NAME,
-        "queue_length": "None",
+        "queue_length": "",
         "queue_db": 0,
-        "queue_created": "None",
-        "queue_updated": "None",
+        "queue_created": "",
+        "queue_updated": "",
         "serialized_uow": serialized_uow,
+        "serialized_result": "",
+        "result_exec_date": ""
     }
     return uow_metadata
 
@@ -107,22 +108,25 @@ def init_unit_of_work(q, unit_of_work, *args) -> Dict[str, Any]:
     return uow_metadata
 
 
-async def set_cmds(queue_client, serial_data: bytes):
-    queue_client.incr("task_auto_index")
-    current_index = queue_client.get("task_auto_index").decode("utf-8")
-    data_with_index = {
-        **{"results": serial_data},
-        "task_id": current_index,
-    }
-    current_loop = asyncio.get_event_loop()
-    serialized_data = await current_loop.run_in_executor(None, serialize_store_data, data_with_index)
-
-    result = queue_client.set(f"uow_result_#{current_index}", serialized_data)
-
-    return result
+async def get_uow_from_store(uow_key: str):
+    current_loop = asyncio.get_running_loop()
+    result = await current_loop.run_in_executor(None, _store.get, uow_key)
+    if not result:
+        logger.error(
+            f"PYTASKIO ERROR: Could not get unit of work with "
+            f"key of {uow_key} from store."
+        )
+    else:
+        return result
 
 
-async def add_uof_result_to_store(queue_client, serial_data: bytes):
-    # If the store being used is redis:
-    result = await set_cmds(queue_client, serial_data)
-    return result
+async def add_uof_result_to_store(executed_uow: Any, uow_metadata: Dict[str, Any]):
+    now = get_datetime_now()
+    # Serialize results
+    serialized_exec_uow = serialize_store_data(executed_uow)
+    # Get the uow metadata from the store by the store_name
+    metadata_from_store = get_uow_from_store(uow_metadata["store_name"])
+    # Add serialized results to store
+    metadata_from_store["serialized_result"] = serialized_exec_uow
+    metadata_from_store["store_updated"] = now
+    metadata_from_store["result_exec_date"] = now

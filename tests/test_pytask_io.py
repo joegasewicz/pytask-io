@@ -61,8 +61,28 @@ class TestPyTaskIO:
         result = py_task.add_task(send_email, "Hello")
 
         print("here------> ", result)
-        assert isinstance(result["serialized_uow"], bytes)
+        # assert isinstance(result["serialized_uow"], bytes)
+        # assert result["store_type"] is "redis"
+        # assert result["store_name'"] is "uow_result_#1"
+        # assert result["store_index"] is 1
+        # assert result["store_db"] is 0
+        # assert result["store_created"] is not "None"
+        # assert result["store_updated"] is "None"
+        # assert result["queue_type"] is "redis"
+        # assert result["queue_name"] is "pytaskio_queue"
+        # assert result["queue_length"] is 1
+        # assert result["queue_db"] is 0
+        # assert result["queue_created"] is not "None"
+        # assert result["queue_updated"] is "None"
+        # assert result["serialized_uow"] is  b"\x80\x03ctests.mock_uow\nsend_email\nq\x00]q\x01X\x05\x00\x00\x00Helloq\x02a\x86q\x03."
+        """
+        Now test the Redis Store to assert that the data there
+        has been updated with the unit of work's results
+        """
+
+
         assert False is True
+
 
     def test_poll_for_task(self):
         data = {
