@@ -108,12 +108,29 @@ def init_unit_of_work(q, unit_of_work, *args) -> Dict[str, Any]:
     return uow_metadata
 
 
-async def get_uow_from_store(uow_key: str) -> Dict[str, Any]:
+def get_uow_from_store(uow_key: str) -> Dict[str, Any]:
+    """
+    Synchronous client version of get_uow_from_store
+    :param uow_key:
+    :return:
+    """
+    result = await _store.get(uow_key)
+    if not result:
+        raise ValueError(
+            f"[PYTASKIO ValueError]: Could not get unit of work with "
+            f"key of {uow_key} from store. Did you pass the correct "
+            f"value to `PyTaskIO.get_task` ?"
+        )
+    else:
+        return result
+
+
+async def _get_uow_from_store(uow_key: str) -> Dict[str, Any]:
     current_loop = asyncio.get_running_loop()
     result = await current_loop.run_in_executor(None, _store.get, uow_key)
     if not result:
         logger.error(
-            f"PYTASKIO ERROR: Could not get unit of work with "
+            f"[PYTASKIO ERROR]: Could not get unit of work with "
             f"key of {uow_key} from store."
         )
     else:
@@ -125,7 +142,7 @@ async def add_uof_result_to_store(executed_uow: Any, uow_metadata: Dict[str, Any
     # Serialize results
     serialized_exec_uow = serialize_store_data(executed_uow)
     # Get the uow metadata from the store by the store_name
-    metadata_from_store = get_uow_from_store(uow_metadata["store_name"])
+    metadata_from_store = await _get_uow_from_store(uow_metadata["store_name"])
     # Add serialized results to store
     metadata_from_store["serialized_result"] = serialized_exec_uow
     metadata_from_store["store_updated"] = now

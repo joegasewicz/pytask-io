@@ -10,7 +10,7 @@ from pytask_io.task_queue import (
 )
 from pytask_io.logger import logger
 from pytask_io.client import client
-from pytask_io.store import init_unit_of_work
+from pytask_io.store import init_unit_of_work, get_uow_from_store
 
 
 def connect_to_store(host: str = "localhost", port: int = 6379, db: int = 0) -> redis.Redis:
@@ -61,12 +61,12 @@ class PyTaskIO:
         """
         return init_unit_of_work(self.queue_client, unit_of_work, *args)
 
-    def get_task(self, task_meta: Dict[str, Any]) -> Union[Dict[str, Any], bool]:
+    def get_task(self, unit_of_work_metadata: Dict[str, Any]) -> Union[Dict[str, Any], bool]:
         """
-        :param task_meta: Dict[str, Any] -
+        :param unit_of_work_metadata: Dict[str, Any] -
         :return Union[Dict, bool]: The result is non blocking
         """
-        result = self.queue_client.lpop("task_results")
+        result = get_uow_from_store(unit_of_work_metadata["store_name"])
         return result
 
     def poll_for_task(self, task_meta: Dict, *args, **kwargs) -> Union[Dict[str, Any], bool]:

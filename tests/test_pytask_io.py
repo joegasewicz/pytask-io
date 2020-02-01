@@ -50,7 +50,7 @@ class TestPyTaskIO:
         fnc, args = event_loop.run_until_complete(deserialize_task(results[1]))
         assert ["Hello", 1] == fnc(*args)
 
-    @pytest.mark.e
+
     def test_add_task(self):
         py_task = PyTaskIO()
         expected = {
@@ -105,3 +105,8 @@ class TestPyTaskIO:
             "task_index": 0,
         }
         assert pytask.poll_for_task(task_meta, tries=1, interval=1) == expected
+
+    @pytest.mark.e
+    def test_get_results(self):
+
+        assert True == False
