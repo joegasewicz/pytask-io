@@ -4,8 +4,12 @@ from typing import Any, Dict
 from functools import partial
 from pytask_io.logger import logger
 
-from pytask_io.utils import serialize_store_data, get_datetime_now, serialize_unit_of_work
-
+from pytask_io.utils import (
+    serialize_store_data,
+    get_datetime_now,
+    serialize_unit_of_work,
+    deserialize_store_data_sync,
+)
 
 def _connect_to_store(host: str = "localhost", port: int = 6379, db: int = 0) -> redis.Redis:
     return redis.Redis(
@@ -114,7 +118,7 @@ def get_uow_from_store(uow_key: str) -> Dict[str, Any]:
     :param uow_key:
     :return:
     """
-    result = await _store.get(uow_key)
+    result = deserialize_store_data_sync(_store.get(uow_key))
     if not result:
         raise ValueError(
             f"[PYTASKIO ValueError]: Could not get unit of work with "

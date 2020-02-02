@@ -38,13 +38,27 @@ class PyTaskIO:
     polled_result: Dict = None
 
     def __init__(self, *args, **kwargs):
-        self.init_app()
+        pass
 
-    def init_app(self):
-        threads = []
+    def run(self):
+        """
+        Starts an event loop on a new thread with a name of `event_loop`
+        :return:
+        """
         self.loop_thread = Thread(name="event_loop", target=self.run_event_loop, daemon=True)
-        threads.append(self.loop_thread)
         self.loop_thread.start()
+
+    def stop(self):
+        """
+        Stops the event loop
+        :return:
+        """
+        # stop event loop
+        current_loop = asyncio.get_running_loop()
+        current_loop.stop()
+        # remove thread
+        self.loop_thread.join()
+        logger.info(f"[PYTASKIO INFO] Event loop thread is alive?: {self.loop_thread.isAlive()}")
 
     def run_event_loop(self):
         self.main_loop = asyncio.new_event_loop()

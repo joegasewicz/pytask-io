@@ -60,6 +60,15 @@ async def deserialize_store_data(task_data: Any):
         return None
 
 
+def deserialize_store_data_sync(task_data: Any):
+    """
+    Synchronous version of deserialize_store_data
+    :param task_data:
+    :return:
+    """
+    return dill.loads(task_data)
+
+
 def get_datetime_now():
     now = datetime.now()
     return now.strftime("%d/%m/%y %H:%M:%S")

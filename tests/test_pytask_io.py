@@ -109,4 +109,16 @@ class TestPyTaskIO:
     @pytest.mark.e
     def test_get_results(self):
 
-        assert True == False
+        def send_email_quick(msg):
+            return msg
+
+        pytask = PyTaskIO()
+        pytask.run()
+        metadata = pytask.add_task(send_email_quick, "Hello Joe 1")
+
+        assert metadata == {}
+        pytask.stop()
+        metadata = {"store_name": "uow_result_#4"}
+        result = pytask.get_task(metadata)
+
+        assert result["serialized_result"] == "Hello Joe 1"
