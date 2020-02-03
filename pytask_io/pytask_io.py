@@ -54,7 +54,7 @@ class PyTaskIO:
         :return:
         """
         # stop event loop
-        current_loop = asyncio.get_running_loop()
+        current_loop = asyncio.get_event_loop()
         current_loop.stop()
         # remove thread
         self.loop_thread.join()
