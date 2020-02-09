@@ -23,8 +23,8 @@ docker run redis
     pytask = PytaskIO(
         store_port=8080,
         store_host="localhost",
-        broker="redis",  # rabbitmq coming soon...
         db=0,
+        workers=1,
     )
     
     # Start the PytaskIO task queue on a separate thread.
