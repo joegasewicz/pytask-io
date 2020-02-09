@@ -13,6 +13,8 @@ def get_tasks(task: List[Callable]):
 
 async def worker(q: asyncio.Queue, queue_client):
     """
+    TODO - queue_client needs to be replaced with queue_store as currently this is how this value is
+    used in add_uof_result_to_store
     - Worker
         - Observes task queue.
         - Fetches available task to run.
@@ -29,5 +31,5 @@ async def worker(q: asyncio.Queue, queue_client):
             *uow_metadata["unit_of_work"]["args"],
         )
 
-        await add_uof_result_to_store(executed_uow, uow_metadata)
+        await add_uof_result_to_store(executed_uow, uow_metadata, queue_client)
         q.task_done()

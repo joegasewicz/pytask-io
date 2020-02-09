@@ -193,7 +193,7 @@ class PyTaskIO:
         :param args: The list of arguments required by `unit_of_work`
         :return: metadata
         """
-        return init_unit_of_work(self.queue_client, unit_of_work, *args)
+        return init_unit_of_work(self.queue_client, self.queue_store, unit_of_work, *args)
 
     def get_task(self, unit_of_work_metadata: Dict[str, Any]) -> Union[Dict[str, Any], None]:
         """
@@ -219,7 +219,7 @@ class PyTaskIO:
         :param unit_of_work_metadata: Dict[str, Any] -
         :return Union[Dict, bool]: The result is non blocking
         """
-        result = get_uow_from_store(unit_of_work_metadata["store_name"])
+        result = get_uow_from_store(self.queue_store, unit_of_work_metadata["store_name"])
         if result == "":
             return None
         return result

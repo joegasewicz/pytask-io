@@ -11,6 +11,7 @@ from pytask_io.utils import (
     deserialize_store_data_sync,
 )
 
+
 def _connect_to_store(host: str = "localhost", port: int = 6379, db: int = 0) -> redis.Redis:
     return redis.Redis(
         host=host,
@@ -58,7 +59,7 @@ def _create_store_index(store: Any):
     return current_index
 
 
-def _create_store_key(store: Any, current_index, serialized_data: bytes = None) -> Dict[str, Any]:
+def _create_store_key(current_index, store, serialized_data: bytes = None) -> Dict[str, Any]:
     uow_store_name = f"uow_result_#{current_index}"
     init_success = store.set(uow_store_name, 0)
     if not init_success:
@@ -77,20 +78,7 @@ def _create_store_key(store: Any, current_index, serialized_data: bytes = None) 
     return uow_metadata
 
 
-"""
-_init_unit_of_work_meta
-    Initiates & returns the main metadata structure for the library.
-    :param serialized_uow: The serialized unit of work to ber added
-    to the task queue.
-"""
-_init_unit_of_work_meta = partial(
-    _create_store_key,
-    _store,
-    _create_store_index(_store),
-)
-
-
-def init_unit_of_work(q, unit_of_work, *args) -> Dict[str, Any]:
+def init_unit_of_work(q, store, unit_of_work, *args) -> Dict[str, Any]:
     """
     Function used directly in PyTaskIO class.
     :param q: The client task queue
@@ -101,7 +89,11 @@ def init_unit_of_work(q, unit_of_work, *args) -> Dict[str, Any]:
     serialized_uow = serialize_unit_of_work(unit_of_work, *args)
     # The unit of work gets saved to the store in case the task
     # fails and the client / user wants to retry
-    uow_metadata = _init_unit_of_work_meta(serialized_uow)
+    uow_metadata = _create_store_key(
+        _create_store_index(store),
+        store,
+        serialized_uow
+    )
 
     # Unit of work gets push onto the task queue & metadata gets updated
     serialized_uow_meta = serialize_store_data(uow_metadata)
@@ -113,13 +105,14 @@ def init_unit_of_work(q, unit_of_work, *args) -> Dict[str, Any]:
     return uow_metadata
 
 
-def get_uow_from_store(uow_key: str) -> Dict[str, Any]:
+def get_uow_from_store(store, uow_key: str) -> Dict[str, Any]:
     """
     Synchronous client version of get_uow_from_store
+    :param store:
     :param uow_key:
     :return:
     """
-    uow_store_metadata = _store.get(uow_key)
+    uow_store_metadata = store.get(uow_key)
     # TODO uow_store_result is always ''
     result = deserialize_store_data_sync(uow_store_metadata)
 
@@ -133,19 +126,19 @@ def get_uow_from_store(uow_key: str) -> Dict[str, Any]:
         return result
 
 
-async def _get_uow_from_store(uow_key: str) -> Dict[str, Any]:
-    current_loop = asyncio.get_running_loop()
-    result = await current_loop.run_in_executor(None, _store.get, uow_key)
-    if not result:
-        logger.error(
-            f"[PYTASKIO ERROR]: Could not get unit of work with "
-            f"key of {uow_key} from store."
-        )
-    else:
-        return result
+# async def _get_uow_from_store(uow_key: str) -> Dict[str, Any]:
+#     current_loop = asyncio.get_running_loop()
+#     result = await current_loop.run_in_executor(None, _store.get, uow_key)
+#     if not result:
+#         logger.error(
+#             f"[PYTASKIO ERROR]: Could not get unit of work with "
+#             f"key of {uow_key} from store."
+#         )
+#     else:
+#         return result
 
 
-async def add_uof_result_to_store(executed_uow: Any, uow_metadata: Dict[str, Any]) -> None:
+async def add_uof_result_to_store(executed_uow: Any, uow_metadata: Dict[str, Any], store) -> None:
     now = get_datetime_now()
 
     # Add serialized results to store
@@ -155,6 +148,6 @@ async def add_uof_result_to_store(executed_uow: Any, uow_metadata: Dict[str, Any
 
     serialized_metadata = serialize_store_data(uow_metadata)
 
-    update_success = _store.set(uow_metadata["store_name"], serialized_metadata)
+    update_success = store.set(uow_metadata["store_name"], serialized_metadata)
     if not update_success:
         logger.error("PyTaskIO Error: Store was unsuccessful updating meta for unit of work.")
