@@ -180,7 +180,7 @@ class PyTaskIO:
             metadata = pytask.add_task(send_email, title, body)
 
 
-            # Later we can use the `metadata` result to pass to :class:`pytask_io.add_task`
+            # Later we can use the `metadata` result to pass to `add_task`
             result = get_task(metadata)
 
         :param unit_of_work: A callable / executable Python function
