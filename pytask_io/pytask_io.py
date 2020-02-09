@@ -50,7 +50,15 @@ class PyTaskIO:
     #:
     #:     # Stop PytaskIO completly (This will not effect any units of work that havent yet executed)
     #:     pytask.stop()
+    #:
+    #: The connected queue client object. Use this object exactly as you would if you were referencing
+    #: the queue's client directly. Example::
+    #:
+    #:    # Example for default Redis queue pushing a task into the queue
+    #:    pytaskio = PytaskIO()
+    #:    results = pytaskio.queue_client.lpush("my_queue", my_task)
     queue_client: redis.Redis
+
     queue_store: redis.Redis
     loop_thread: Thread
     main_loop: asyncio.AbstractEventLoop
@@ -76,7 +84,7 @@ class PyTaskIO:
         self.queue_store = self._connect_to_store()
         self.loop_thread = Thread(
             name="event_loop",
-            target=self.run_event_loop,
+            target=self._run_event_loop,
         )
         self.loop_thread.daemon = True
         self.loop_thread.start()
@@ -98,7 +106,7 @@ class PyTaskIO:
         current_loop.call_soon_threadsafe(current_loop.stop)
         self.loop_thread.join()
 
-    def run_event_loop(self):
+    def _run_event_loop(self):
         self.main_loop = asyncio.new_event_loop()
         self.main_loop.create_task(client(self.queue_client))
         self.main_loop.run_forever()
@@ -134,7 +142,7 @@ class PyTaskIO:
         tries = kwargs.get("tries")
         interval = kwargs.get("interval")
         if tries:
-            # Create event loop in new thread
+            # Create event loop in the main thread
             self.pole_loop = asyncio.get_event_loop()
             # Coroutine to pole store on event loop
             get_store_results = pole_for_store_results(self.queue_store, task_meta, interval, tries)
