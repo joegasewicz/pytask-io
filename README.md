@@ -39,6 +39,10 @@ docker run redis
     # Stop PytaskIO completly (This will not effect any units of work that havent yet executed)
     pytask.stop()
     
+    # Later we can use the `metadata` result to pass to `add_task`
+    result = poll_for_task(metadata, tries=100, interval=60)
+
+    
 ```
 
 ## Authors
