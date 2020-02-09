@@ -136,8 +136,15 @@ class PyTaskIO:
         """
         Method to elegantly stop the asyncio event loop & join the `event_loop` thread.
         This method will only be executed when all active task have finished executing.
-        If there are any pending tasks left in the clients queue then these can be execcuted
+        If there are any pending tasks left in the clients queue then these can be executed
         once PytaskIO is run again.
+        Example::
+            pytaskio = PyTaskIO()
+            pytaskio.run()
+            try:
+                metadata = pytask.add_task(send_email, title, body)
+            except RunTimeError:
+                pytaskio.stop()
         :return: None
         """
         # stop event loop
