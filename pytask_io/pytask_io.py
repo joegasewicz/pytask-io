@@ -59,7 +59,15 @@ class PyTaskIO:
     #:    results = pytaskio.queue_client.lpush("my_queue", my_task)
     queue_client: redis.Redis
 
+    #: The `queue_store` is available to work with & can be accessed on the PyTaskIO instance
+    #: & all the available methods from the store framework used will be available on this object.
+    #: Foe example::
+    #:
+    #:    # Example fpr default Redis store setting a new key
+    #:    pytaskio = PytaskIO()
+    #:    pytaskio.queue_store.set('myfield', 'my_value')
     queue_store: redis.Redis
+
     loop_thread: Thread
     main_loop: asyncio.AbstractEventLoop
     pole_loop: asyncio.AbstractEventLoop
