@@ -41,8 +41,6 @@ docker run redis
     
 ```
 
-### Initial design
-![PyTask IO](assets/design2.png?raw=true "Title")
 ## Authors
 
 * **joegasewicz** - *Initial work* - [@joegasewicz](https://twitter.com/joegasewicz)
