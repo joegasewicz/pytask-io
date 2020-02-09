@@ -4,7 +4,7 @@ import time
 
 from pytask_io.client import client
 from pytask_io.utils import deserialize_task, serialize_store_data, serialize_unit_of_work
-from pytask_io.pytask_io import PyTaskIO, connect_to_store
+from pytask_io.pytask_io import PyTaskIO
 from tests.mock_uow import send_email
 
 
@@ -43,7 +43,7 @@ class TestPyTaskIO:
     def test_init(self, event_loop):
         dumped_uow = serialize_unit_of_work(send_email, "Hello", 1)
         r.lpush("tasks", dumped_uow)
-        queue_client = connect_to_store()
+        queue_client = self._connect_to_store()
 
         results = r.brpop("tasks")
         event_loop.run_until_complete(client(queue_client))

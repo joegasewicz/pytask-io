@@ -13,14 +13,6 @@ from pytask_io.client import client
 from pytask_io.store import init_unit_of_work, get_uow_from_store
 
 
-def connect_to_store(host: str = "localhost", port: int = 6379, db: int = 0) -> redis.Redis:
-    return redis.Redis(
-        host=host,
-        port=port,
-        db=db,
-    )
-
-
 def send_email(arg1: str, arg2: int):
     time.sleep(1)
     return [arg1, arg2]
@@ -29,29 +21,43 @@ def send_email(arg1: str, arg2: int):
 class PyTaskIO:
 
     units_of_work: List[Callable]
-    queue_client: redis.Redis = connect_to_store()
-    queue_store: redis.Redis = connect_to_store()
+    queue_client: redis.Redis
+    queue_store: redis.Redis
     loop_thread: Thread
     main_loop: asyncio.AbstractEventLoop
     pole_loop: asyncio.AbstractEventLoop
     task_results: str = "task_results"
     polled_result: Dict = None
     current_thread = None
+    store_host: str = "localhost"
+    store_port: int = 6379
+    store_db: int = 0
 
     def __init__(self, *args, **kwargs):
-        pass
+        self.store_host = kwargs.get("store_host") or self.store_host
+        self.store_port = kwargs.get("store_port") or self.store_port
+        self.store_db = kwargs.get("store_db") or self.store_db
 
     def run(self):
         """
         Starts an event loop on a new thread with a name of `event_loop`
         :return:
         """
+        self.queue_client = self._connect_to_store()
+        self.queue_store = self._connect_to_store()
         self.loop_thread = Thread(
             name="event_loop",
             target=self.run_event_loop,
         )
         self.loop_thread.daemon = True
         self.loop_thread.start()
+
+    def _connect_to_store(self):
+        return redis.Redis(
+            host=self.store_host,
+            port=self.store_port,
+            db=self.store_db
+        )
 
     def stop(self):
         """
