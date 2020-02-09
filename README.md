@@ -10,7 +10,7 @@ An Asyncio based task queue that is designed to be super easy the use!
 ```bash
 pip install pytask-io
 
-docker run redis
+docker run redis  # Rabbit MQ coming soon...
 
 ```
 
