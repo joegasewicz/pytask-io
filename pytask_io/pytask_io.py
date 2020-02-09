@@ -139,12 +139,14 @@ class PyTaskIO:
         If there are any pending tasks left in the clients queue then these can be executed
         once PytaskIO is run again.
         Example::
+
             pytaskio = PyTaskIO()
             pytaskio.run()
             try:
                 metadata = pytask.add_task(send_email, title, body)
             except RunTimeError:
                 pytaskio.stop()
+
         :return: None
         """
         # stop event loop
@@ -152,7 +154,10 @@ class PyTaskIO:
         current_loop.call_soon_threadsafe(current_loop.stop)
         self.loop_thread.join()
 
-    def _run_event_loop(self):
+    def _run_event_loop(self) -> None:
+        """
+        :return: None
+        """
         self.main_loop = asyncio.new_event_loop()
         self.main_loop.create_task(client(self.queue_client))
         self.main_loop.run_forever()
@@ -160,10 +165,27 @@ class PyTaskIO:
 
     def add_task(self, unit_of_work, *args) -> Dict[str, Any]:
         """
-        Adds units of work to the queue client
+        :class:`pytask_io.add_task` method take a function as a first argument
+        & the function arguments as the next arguments. When :class:`pytask_io.add_task`
+        is called, it will return a dictionary with some useful data. Although the data
+        returned can be used in many ways, the easiest & most straight forward use is to
+        pass this dict directly to :class:`pytask_io.get_task`.
+        Example::
+
+            # Create a `pytaskio` object & run the event loop in new thread:
+            pytaskio = PyTaskIO()
+            pytaskio.run()
+
+            # the `add_task` method task in a function as a first argument
+            metadata = pytask.add_task(send_email, title, body)
+
+
+            # Later we can use the `metadata` result to pass to :class:`pytask_io.add_task`
+            result = get_task(metadata)
+
         :param unit_of_work: A callable / executable Python function
         :param args: The list of arguments required by `unit_of_work`
-        :return:
+        :return: metadata
         """
         return init_unit_of_work(self.queue_client, unit_of_work, *args)
 
