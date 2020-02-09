@@ -6,9 +6,13 @@ with open("README.md", "r") as fh:
 
 setup(
     name="pytask-io",
-    version="0.0.1",
+    version="0.0.2",
     description="An asynchronous Tasks Library using asyncio",
     packages=['pytask_io'],
+    install_requires=[
+        'redis',
+        'dill'
+    ],
     classifiers=[
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
