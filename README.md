@@ -36,13 +36,12 @@ docker run redis  # Rabbit MQ coming soon...
     # Try once to get the results of your email sometime in the future
     result = get_task(metadata)
     
-    # Stop PytaskIO completly (This will not effect any units of work that havent yet executed)
-    pytask.stop()
-    
     # Later we can use the `metadata` result to pass to `add_task`
     result = poll_for_task(metadata, tries=100, interval=60)
-
     
+    # Stop PytaskIO completly (This will not effect any units of work that havent yet executed)
+    pytask.stop()
+
 ```
 
 ## Authors
