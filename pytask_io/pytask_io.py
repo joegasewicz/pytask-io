@@ -68,20 +68,43 @@ class PyTaskIO:
     #:    pytaskio.queue_store.set('myfield', 'my_value')
     queue_store: redis.Redis
 
+    #: The thread that the asyncio event loop runs in. This thread has been tagged with the name of
+    #: `event_loop`. The thread will die gracefully when PytaskIO calls `event_loop.join()` for you. If
+    #: you require custom handling of the `event_loop` thread, then you can access it directly using
+    #: the :class:`pytask_io.loop_thread` object. Example::
+    #:
+    #:    pytaskio = PytaskIO()
+    #:    pytaskio.loop_thread.is_alive() # check if the thread is still alive
     loop_thread: Thread
+
+    #: The main loop that is used by PytaskIO. If you wish to handle some of the asyncio behavior of the
+    #: main loop, then you can access the asyncio object directly with :class:`pytask_io.main_loop`.
     main_loop: asyncio.AbstractEventLoop
+
+    #: The pole loop that is available for PytaskIO public methods such as :class:`pytask_io.poll_for_task`
+    #: If you wish to handle some of the asyncio behavior of the pole loop, then you can access the asyncio
+    #: object directly with :class:`pytask_io.pole_loop`.
     pole_loop: asyncio.AbstractEventLoop
-    task_results: str = "task_results"
-    polled_result: Dict = None
-    current_thread = None
+
+    #: The store host name. Default is `localhost`.
     store_host: str = "localhost"
+
+    #: The store port. Default is 0
     store_port: int = 6379
+
+    #: The store db number. Default is 6379
     store_db: int = 0
+
+    #: The amount of workers in the asyncio task queue. Default is 1.
+    workers: int = 1
+
+    _polled_result: Dict = None
 
     def __init__(self, *args, **kwargs):
         self.store_host = kwargs.get("store_host") or self.store_host
         self.store_port = kwargs.get("store_port") or self.store_port
         self.store_db = kwargs.get("store_db") or self.store_db
+        self.workers = kwargs.get("workers") or self.workers
 
     def run(self):
         """
@@ -155,10 +178,10 @@ class PyTaskIO:
             # Coroutine to pole store on event loop
             get_store_results = pole_for_store_results(self.queue_store, task_meta, interval, tries)
             asyncio.set_event_loop(self.pole_loop)
-            self.polled_result = self.pole_loop.run_until_complete(get_store_results)
-        if self.polled_result:
+            self._polled_result = self.pole_loop.run_until_complete(get_store_results)
+        if self._polled_result:
             task_result_data = {
-                "data": self.polled_result,
+                "data": self._polled_result,
                 **task_meta,
             }
             return task_result_data
