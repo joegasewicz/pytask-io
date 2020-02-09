@@ -109,6 +109,12 @@ class PyTaskIO:
     def run(self):
         """
         Starts an event loop on a new thread with a name of `event_loop`
+        Example::
+
+            # Create a `pytaskio` object & run the event loop in new thread:
+            pytaskio = PyTaskIO()
+            pytaskio.run()
+
         :return:
         """
         self.queue_client = self._connect_to_store()
