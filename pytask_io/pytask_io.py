@@ -120,17 +120,25 @@ class PyTaskIO:
         self.loop_thread.daemon = True
         self.loop_thread.start()
 
-    def _connect_to_store(self):
+    def _connect_to_store(self) -> redis.Redis:
+        """
+        Private method that is used to connect to the client queue & store.
+        This will change when we introduce more store & queue options.
+        :return: None
+        """
         return redis.Redis(
             host=self.store_host,
             port=self.store_port,
             db=self.store_db
         )
 
-    def stop(self):
+    def stop(self) -> None:
         """
-        Stops the event loop
-        :return:
+        Method to elegantly stop the asyncio event loop & join the `event_loop` thread.
+        This method will only be executed when all active task have finished executing.
+        If there are any pending tasks left in the clients queue then these can be execcuted
+        once PytaskIO is run again.
+        :return: None
         """
         # stop event loop
         current_loop = asyncio.get_event_loop()
