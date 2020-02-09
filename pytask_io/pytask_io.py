@@ -13,11 +13,6 @@ from pytask_io.client import client
 from pytask_io.store import init_unit_of_work, get_uow_from_store
 
 
-def send_email(arg1: str, arg2: int):
-    time.sleep(1)
-    return [arg1, arg2]
-
-
 class PyTaskIO:
 
     units_of_work: List[Callable]
