@@ -61,7 +61,6 @@ class TestPyTaskIO:
 
         result = py_task.add_task(send_email, "Hello")
 
-        print("here------> ", result)
         # assert isinstance(result["serialized_uow"], bytes)
         # assert result["store_type"] is "redis"
         # assert result["store_name'"] is "uow_result_#1"

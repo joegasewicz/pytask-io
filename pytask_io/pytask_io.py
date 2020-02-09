@@ -1,3 +1,7 @@
+"""
+Pytask IO Class
+===============
+"""
 import asyncio
 from typing import List, Callable
 import redis
@@ -14,8 +18,38 @@ from pytask_io.store import init_unit_of_work, get_uow_from_store
 
 
 class PyTaskIO:
+    """
+    :kwargs:
+    :key store_host: The store host name. Default is `localhost`.
+    :key store_port: The store port. Default is 0
+    :key store db: The store db number. Default is 6379
+    :key workers: The amount of workers in the asyncio task queue. Default is 1.
+    """
 
-    units_of_work: List[Callable]
+    #: PytaskIO is a python task queue that leverages CPython's asyncio library
+    #: to make long running task trivial. The library aims to make the public
+    #: API as simple and intuitive as possible.
+    #: Basic usage. Example::
+    #:
+    #:    Starts the task runner
+    #:          pytask = PytaskIO(
+    #:          store_port=8080,
+    #:          store_host="localhost",
+    #:          broker="redis",  # rabbitmq coming soon...
+    #:          db=0,
+    #:     )
+    #:
+    #:     # Start the PytaskIO task queue on a separate thread.
+    #:     pytask.run()
+    #:
+    #:     # Handle a long running process, in this case a send email function
+    #:     metadata = pytask.add_task(send_email, title, body)
+    #:
+    #:     # Try once to get the results of your email sometime in the future
+    #:     result = get_task(metadata)
+    #:
+    #:     # Stop PytaskIO completly (This will not effect any units of work that havent yet executed)
+    #:     pytask.stop()
     queue_client: redis.Redis
     queue_store: redis.Redis
     loop_thread: Thread
