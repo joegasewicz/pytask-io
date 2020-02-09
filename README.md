@@ -15,7 +15,6 @@ docker run redis  # Rabbit MQ coming soon...
 ```
 
 
-
 ### Usage
 
 ```python
