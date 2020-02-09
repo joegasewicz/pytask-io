@@ -31,13 +31,13 @@ docker run redis
     pytask.run()
     
     # Handle a long running process, in this case a send email function
-    task_id = pytask.add_task(send_email, title, body)
+    metadata = pytask.add_task(send_email, title, body)
     
     # Try once to get the results of your email sometime in the future
-    result = get_task(task_id) # returns either the result or false
+    result = get_task(metadata)
     
-    # Or poll for the results
-    result = poll_for_task_results(task_id, tries=100, interval=5, interval_type="minutes")
+    # Stop PytaskIO completly (This will not effect any units of work that havent yet executed)
+    pytask.stop()
     
 ```
 
