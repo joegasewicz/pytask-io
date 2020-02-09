@@ -1,3 +1,6 @@
+![PyPI](https://img.shields.io/pypi/v/pytask-io)
+![Read the Docs](https://img.shields.io/readthedocs/pytask-io)
+
 # Pytask IO
 
 
