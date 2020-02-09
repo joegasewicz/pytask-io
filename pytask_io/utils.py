@@ -35,7 +35,7 @@ async def get_task_from_queue_client(q: redis.Redis) -> Tuple[Callable, List]:  
         current_loop = asyncio.get_running_loop()
     except RuntimeError as err:
         raise RuntimeError(f"PyTaskIO: {err}")
-    result = await current_loop.run_in_executor(None, q.brpop, "tasks")
+    result = await current_loop.run_in_executor(None, q.brpop, "pytaskio_queue") # TODO pytaskio_queue -get from global
     return result
 
 
@@ -66,8 +66,8 @@ def deserialize_store_data_sync(task_data: Any):
     :param task_data:
     :return:
     """
-    return dill.loads(task_data)
-
+    deserialized_uow = dill.loads(task_data)
+    return deserialized_uow
 
 def get_datetime_now():
     now = datetime.now()

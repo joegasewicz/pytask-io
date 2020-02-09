@@ -44,6 +44,7 @@ def _create_uow_metadata(uow_store_name: str, index: int, datetime_now: Any, ser
         "queue_db": 0,
         "queue_created": "",
         "queue_updated": "",
+        "unit_of_work": {},
         "serialized_uow": serialized_uow,
         "serialized_result": "",
         "result_exec_date": ""
@@ -118,7 +119,10 @@ def get_uow_from_store(uow_key: str) -> Dict[str, Any]:
     :param uow_key:
     :return:
     """
-    result = deserialize_store_data_sync(_store.get(uow_key))
+    uow_store_metadata = _store.get(uow_key)
+    # TODO uow_store_result is always ''
+    result = deserialize_store_data_sync(uow_store_metadata)
+
     if not result:
         raise ValueError(
             f"[PYTASKIO ValueError]: Could not get unit of work with "
@@ -143,11 +147,14 @@ async def _get_uow_from_store(uow_key: str) -> Dict[str, Any]:
 
 async def add_uof_result_to_store(executed_uow: Any, uow_metadata: Dict[str, Any]) -> None:
     now = get_datetime_now()
-    # Serialize results
-    serialized_exec_uow = serialize_store_data(executed_uow)
-    # Get the uow metadata from the store by the store_name
-    metadata_from_store = await _get_uow_from_store(uow_metadata["store_name"])
+
     # Add serialized results to store
-    metadata_from_store["serialized_result"] = serialized_exec_uow
-    metadata_from_store["store_updated"] = now
-    metadata_from_store["result_exec_date"] = now
+    uow_metadata["serialized_result"] = executed_uow
+    uow_metadata["store_updated"] = now
+    uow_metadata["result_exec_date"] = now
+
+    serialized_metadata = serialize_store_data(uow_metadata)
+
+    update_success = _store.set(uow_metadata["store_name"], serialized_metadata)
+    if not update_success:
+        logger.error("PyTaskIO Error: Store was unsuccessful updating meta for unit of work.")

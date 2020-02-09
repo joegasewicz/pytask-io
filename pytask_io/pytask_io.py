@@ -2,7 +2,7 @@ import asyncio
 from typing import List, Callable
 import redis
 import time
-from threading import Thread
+from threading import Thread, Event, currentThread#
 from typing import Dict, Any, Union
 
 from pytask_io.task_queue import (
@@ -36,6 +36,7 @@ class PyTaskIO:
     pole_loop: asyncio.AbstractEventLoop
     task_results: str = "task_results"
     polled_result: Dict = None
+    current_thread = None
 
     def __init__(self, *args, **kwargs):
         pass
@@ -45,7 +46,11 @@ class PyTaskIO:
         Starts an event loop on a new thread with a name of `event_loop`
         :return:
         """
-        self.loop_thread = Thread(name="event_loop", target=self.run_event_loop, daemon=True)
+        self.loop_thread = Thread(
+            name="event_loop",
+            target=self.run_event_loop,
+        )
+        self.loop_thread.daemon = True
         self.loop_thread.start()
 
     def stop(self):
@@ -55,10 +60,8 @@ class PyTaskIO:
         """
         # stop event loop
         current_loop = asyncio.get_event_loop()
-        current_loop.stop()
-        # remove thread
+        current_loop.call_soon_threadsafe(current_loop.stop)
         self.loop_thread.join()
-        logger.info(f"[PYTASKIO INFO] Event loop thread is alive?: {self.loop_thread.isAlive()}")
 
     def run_event_loop(self):
         self.main_loop = asyncio.new_event_loop()

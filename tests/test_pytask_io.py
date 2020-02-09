@@ -1,5 +1,6 @@
 import pytest
 import redis
+import time
 
 from pytask_io.client import client
 from pytask_io.utils import deserialize_task, serialize_store_data, serialize_unit_of_work
@@ -112,13 +113,14 @@ class TestPyTaskIO:
         def send_email_quick(msg):
             return msg
 
-        pytask = PyTaskIO()
-        pytask.run()
-        metadata = pytask.add_task(send_email_quick, "Hello Joe 1")
+        pytask_io = PyTaskIO()
+        pytask_io.run()
+        metadata = pytask_io.add_task(send_email_quick, "Hello Joe 1")
+        time.sleep(3)
 
         # assert metadata == {}
-        pytask.stop()
-        metadata = {"store_name": "uow_result_#4"}
-        result = pytask.get_task(metadata)
+        # pytask_io.stop()
+        metadata = {"store_name": "uow_result_#1"}
+        result = pytask_io.get_task(metadata)
 
         assert result["serialized_result"] == "Hello Joe 1"

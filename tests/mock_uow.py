@@ -4,9 +4,7 @@
 import time
 
 
-def send_email(arg1: str):
-    print(f"FUNCTION EXECUTED!")
-    return arg1
+def send_email(arg1: str): return arg1
 
 """
 
