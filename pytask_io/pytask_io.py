@@ -163,7 +163,7 @@ class PyTaskIO:
         self.main_loop.run_forever()
         logger.info("asyncIO event loop running")
 
-    def add_task(self, unit_of_work, *args) -> Dict[str, Any]:
+    def add_task(self, unit_of_work: Callable, *args) -> Dict[str, Any]:
         """
         :class:`pytask_io.add_task` method take a function as a first argument
         & the function arguments as the next arguments. When :class:`pytask_io.add_task`
@@ -189,22 +189,60 @@ class PyTaskIO:
         """
         return init_unit_of_work(self.queue_client, unit_of_work, *args)
 
-    def get_task(self, unit_of_work_metadata: Dict[str, Any]) -> Union[Dict[str, Any], bool]:
+    def get_task(self, unit_of_work_metadata: Dict[str, Any]) -> Union[Dict[str, Any], None]:
         """
+        Method to get the task results from the store. This function can be called
+        directly after executing the :class:`pytask_io.add_task`. If the results
+        referenced from the `metadata` dict *see below* are available when this method
+        is called, then the result is return otherwise `None` is returned. If the
+        result is `None`, then you have to retry to call this method again, sometime
+        in the future.
+        Example::
+
+            # Create a `pytaskio` object & run the event loop in new thread:
+            pytaskio = PyTaskIO()
+            pytaskio.run()
+
+            # the `add_task` method task in a function as a first argument
+            metadata = pytask.add_task(send_email, title, body)
+
+
+            # Later we can use the `metadata` result to pass to `add_task`
+            result = get_task(metadata)
+
         :param unit_of_work_metadata: Dict[str, Any] -
         :return Union[Dict, bool]: The result is non blocking
         """
         result = get_uow_from_store(unit_of_work_metadata["store_name"])
+        if result == "":
+            return None
         return result
 
-    def poll_for_task(self, task_meta: Dict, *args, **kwargs) -> Union[Dict[str, Any], bool]:
+    def poll_for_task(self, task_meta: Dict, **kwargs) -> Union[Dict[str, Any], bool]:
         """
+        Warning: This method is still in a beta state, use with care!
         Blocking function to be used either with an async library or from a separate thread
-        from the client application's main thread. Example::
+        from the client application's main thread.
+        This method will create an asyncio event loop & make periodic requests to the store.
+        Once the results are returned, the loop with be stopped and the main thread will
+        be available once again.
+        Example::
+
+            # Create a `pytaskio` object & run the event loop in new thread:
+            pytaskio = PyTaskIO()
+            pytaskio.run()
+
+            # the `add_task` method task in a function as a first argument
+            metadata = pytask.add_task(send_email, title, body)
+
+
+            # Later we can use the `metadata` result to pass to `add_task`
+            result = poll_for_task(metadata, tries=100, interval=60)
 
         :param task_meta:
-        :param args:
         :param kwargs:
+        :key tries: The amount of times the method polls the store for the task execution results.
+        :key interval: The time in seconds for each try
         :return:
         """
         tries = kwargs.get("tries")
