@@ -7,7 +7,7 @@ from pytask_io.worker import worker
 from pytask_io.utils import get_task_from_queue_client, deserialize_task
 
 
-async def client(queue_client: redis.Redis):
+async def client(queue_client: redis.Redis, workers_required: int):
     """
         Client for Workers, Tasks & AsyncIO's Event Loop
     """
@@ -28,7 +28,7 @@ async def client(queue_client: redis.Redis):
 
     # Create `3` workers tasks to process the queue concurrently
     tasks = []
-    for i in range(1):  # TODO update amount of workers with user options
+    for i in range(workers_required):  # TODO update amount of workers with user options
         task = asyncio.create_task(worker(queue, queue_client))
         tasks.append(task)
     # Wait until queue is fully processed
