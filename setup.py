@@ -10,8 +10,8 @@ setup(
     description="An asynchronous Tasks Library using asyncio",
     packages=['pytask_io'],
     install_requires=[
-        'redis',
-        'dill'
+        'redis>=3.3.11,<4.0.0',
+        'dill>=0.3.1.1,<0.4.0.0',   
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
