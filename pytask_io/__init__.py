@@ -14,7 +14,7 @@
         - Redis is the message broker.
 
 """
-
+from .pytask_io import PyTaskIO
 
 if __name__ == "__main__":
     pass
