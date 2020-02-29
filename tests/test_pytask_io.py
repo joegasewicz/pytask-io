@@ -106,7 +106,7 @@ class TestPyTaskIO:
         }
         assert pytask.poll_for_task(task_meta, tries=1, interval=1) == expected
 
-    @pytest.mark.e
+
     def test_get_results(self):
 
         def send_email_quick(msg):
