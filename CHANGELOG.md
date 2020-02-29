@@ -1,0 +1,10 @@
+# Changelog
+
+### Changed
+
+**Release 0.0.4** - 2020-02-29
+
+-   Updates to a direct to the PytaskIO class & removes `requirements.txt` [Issue #32](https://github.com/joegasewicz/pytask-io/issues/32)
+-   Adds Pifile & Pipfile.lock / pipenv to the project [Issue #31](https://github.com/joegasewicz/Flask-JWT-Router/issues/114)
+
+## Unreleased`
