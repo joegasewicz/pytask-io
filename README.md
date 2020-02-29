@@ -29,7 +29,7 @@ docker run redis  # Rabbit MQ coming soon...
     
     # Starts the task runner
     pytask = PytaskIO(
-        store_port=8080,
+        store_port=6379,
         store_host="localhost",
         db=0,
         workers=1,

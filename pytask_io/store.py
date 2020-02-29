@@ -10,15 +10,6 @@ from pytask_io.utils import (
 )
 
 
-def _connect_to_store(host: str = "localhost", port: int = 6379, db: int = 0) -> redis.Redis:
-    return redis.Redis(
-        host=host,
-        port=port,
-        db=db,
-    )
-
-
-_store = _connect_to_store()
 _QUEUE_NAME = "pytaskio_queue"
 
 
