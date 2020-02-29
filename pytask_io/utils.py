@@ -1,10 +1,7 @@
 import asyncio
-import logging
 import redis
 import dill
-import json
-from toolz.functoolz import compose, curry, pipe
-from typing import List, Any, Dict, Tuple, Callable, Awaitable
+from typing import List, Any, Tuple, Callable
 from datetime import datetime
 
 
@@ -68,6 +65,7 @@ def deserialize_store_data_sync(task_data: Any):
     """
     deserialized_uow = dill.loads(task_data)
     return deserialized_uow
+
 
 def get_datetime_now():
     now = datetime.now()

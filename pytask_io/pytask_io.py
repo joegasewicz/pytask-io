@@ -5,8 +5,7 @@ Pytask IO Class
 import asyncio
 from typing import List, Callable
 import redis
-import time
-from threading import Thread, Event, currentThread#
+from threading import Thread
 from typing import Dict, Any, Union
 
 from pytask_io.task_queue import (
