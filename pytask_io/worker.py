@@ -2,7 +2,6 @@ import asyncio
 from typing import List, Callable
 
 from pytask_io.store import add_uof_result_to_store
-from pytask_io.utils import serialize_store_data, deserialize_task
 
 tasks = []
 

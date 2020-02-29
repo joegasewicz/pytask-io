@@ -10,6 +10,4 @@ pampy = "*"
 importlib-metadata = "*"
 
 [packages]
-redis = ">=3.3.11,<4.0.0"
-dill = ">=0.3.1.1,<0.4.0.0"
-toolz = ">=0.10.0,<0.11.0"
+pytask-io = {path = ".", editable = true}

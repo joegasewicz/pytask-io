@@ -1,7 +1,5 @@
 import redis
-import asyncio
 from typing import Any, Dict
-from functools import partial
 from pytask_io.logger import logger
 
 from pytask_io.utils import (
@@ -124,18 +122,6 @@ def get_uow_from_store(store, uow_key: str) -> Dict[str, Any]:
         )
     else:
         return result
-
-
-# async def _get_uow_from_store(uow_key: str) -> Dict[str, Any]:
-#     current_loop = asyncio.get_running_loop()
-#     result = await current_loop.run_in_executor(None, _store.get, uow_key)
-#     if not result:
-#         logger.error(
-#             f"[PYTASKIO ERROR]: Could not get unit of work with "
-#             f"key of {uow_key} from store."
-#         )
-#     else:
-#         return result
 
 
 async def add_uof_result_to_store(executed_uow: Any, uow_metadata: Dict[str, Any], store) -> None:
