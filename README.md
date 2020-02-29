@@ -51,6 +51,12 @@ docker run redis  # Rabbit MQ coming soon...
     pytask.stop()
 
 ```
+### Compatible task types
+PyTaskIO will always return back the task meta data.
+Do not embed Python objects of type frame, generator, traceback & context objects.
+In this case you will get back the exception thrown when PyTaskIO attempts to execute the serialization.
+
+
 
 ## Authors
 
