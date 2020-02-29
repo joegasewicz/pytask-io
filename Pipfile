@@ -8,6 +8,13 @@ pytest = "*"
 Sphinx = "*"
 pampy = "*"
 importlib-metadata = "*"
+pylint = "*"
+black = "*"
+isort = "*"
+pre-commit = "*"
 
 [packages]
 pytask-io = {path = ".", editable = true}
+
+[pipenv]
+allow_prereleases = true
