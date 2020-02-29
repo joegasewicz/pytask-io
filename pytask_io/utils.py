@@ -3,17 +3,29 @@ import redis
 import dill
 from typing import List, Any, Tuple, Callable
 from datetime import datetime
+from warnings import warn
 
 
 def serialize_unit_of_work(unit_of_work: Any, *args) -> bytes:
     """
     Serializes a unit of work & returns the results
-    :param unit_of_work:s
+    This will return a new function with the error back to the user
+    with a warning.
+    :param unit_of_work
     :param args:
     :return:
     """
-    serialized_uow = dill.dumps((unit_of_work, [*args]))
-    return serialized_uow
+    try:
+        serialized_uow = dill.dumps((unit_of_work, [*args]))
+        return serialized_uow
+    except TypeError as err:
+        warn(
+            "[PYTASK_IO WARNING] Task could not be serialized! "
+            "PyTaskIO not support frame, generator, traceback & context objects."
+        )
+        def pytask_io_err(err):
+            return err
+        return dill.dumps((pytask_io_err, err))
 
 
 def serialize_store_data(store_data: Any) -> bytes:
