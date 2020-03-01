@@ -4,7 +4,7 @@ import dill
 from typing import List, Any, Tuple, Callable
 from datetime import datetime
 from warnings import warn
-
+import concurrent.futures
 
 def serialize_unit_of_work(unit_of_work: Any, *args) -> bytes:
     """
@@ -50,11 +50,19 @@ async def get_task_from_queue_client(q: redis.Redis) -> Tuple[Callable, List]:  
 
 async def deserialize_task(task_data: Any):
     try:
-        current_loop = asyncio.get_running_loop()
+        current_loop = asyncio.get_event_loop()
     except RuntimeError as err:
         raise RuntimeError(f"PyTaskIO: {err}")
-    result = await current_loop.run_in_executor(None, dill.loads, task_data)
-    return result
+    try:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
+            result = await asyncio.wait(current_loop.run_in_executor(
+                pool,
+                dill.loads,
+                task_data,
+            ))
+            return result
+    except RuntimeError as err:
+        raise Exception(err)
 
 
 async def deserialize_store_data(task_data: Any):
