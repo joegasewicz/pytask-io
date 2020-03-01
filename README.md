@@ -42,10 +42,10 @@ docker run redis  # Rabbit MQ coming soon...
     metadata = pytask.add_task(send_email, title, body)
     
     # Try once to get the results of your email sometime in the future
-    result = get_task(metadata)
+    result = pytask.get_task(metadata)
     
     # Later we can use the `metadata` result to pass to `add_task`
-    result = poll_for_task(metadata, tries=100, interval=60)
+    result = pytask.poll_for_task(metadata, tries=100, interval=60)
     
     # Stop PytaskIO completely (This will not affect any units of work that haven't yet executed)
     pytask.stop()
