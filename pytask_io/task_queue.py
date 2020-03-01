@@ -6,7 +6,7 @@ from typing import Dict
 from pytask_io.utils import deserialize_store_data
 
 
-async def pole_for_store_results(queue_store: redis.Redis, task_meta: Dict, tries: int, interval: int):
+async def poll_for_store_results(queue_store: redis.Redis, task_meta: Dict, tries: int, interval: int):
     """
     Streams back results to
     :param queue_store:

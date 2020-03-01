@@ -9,7 +9,7 @@ from threading import Thread
 from typing import Dict, Any, Union
 
 from pytask_io.task_queue import (
-    pole_for_store_results,
+    poll_for_store_results,
 )
 from pytask_io.logger import logger
 from pytask_io.client import client
@@ -256,7 +256,7 @@ class PyTaskIO:
             # Create event loop in the main thread
             self.pole_loop = asyncio.get_event_loop()
             # Coroutine to pole store on event loop
-            get_store_results = pole_for_store_results(self.queue_store, task_meta, interval, tries)
+            get_store_results = poll_for_store_results(self.queue_store, task_meta, interval, tries)
             asyncio.set_event_loop(self.pole_loop)
             self._polled_result = self.pole_loop.run_until_complete(get_store_results)
         if self._polled_result:
