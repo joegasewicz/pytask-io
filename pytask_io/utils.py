@@ -54,15 +54,11 @@ async def deserialize_task(task_data: Any):
     except RuntimeError as err:
         raise RuntimeError(f"PyTaskIO: {err}")
     try:
-        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
-            result = await asyncio.wait(current_loop.run_in_executor(
-                pool,
-                dill.loads,
-                task_data,
-            ))
-            return result
+        result = await current_loop.run_in_executor(None, dill.loads, task_data)
+        return result
     except RuntimeError as err:
         raise Exception(err)
+
 
 
 async def deserialize_store_data(task_data: Any):
