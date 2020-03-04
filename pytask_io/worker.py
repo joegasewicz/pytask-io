@@ -24,11 +24,15 @@ async def worker(q: asyncio.Queue, queue_client):
         current_loop = asyncio.get_running_loop()
 
         # Execute the unit of work & pass in the args
-        executed_uow = await current_loop.run_in_executor(
-            None,
-            uow_metadata["unit_of_work"]["function"],
-            *uow_metadata["unit_of_work"]["args"],
-        )
+        try:
+            executed_uow = await current_loop.run_in_executor(
+                None,
+                uow_metadata["unit_of_work"]["function"],
+                *uow_metadata["unit_of_work"]["args"],
+            )
+        except Exception as err:
+            pass
+        # update metadata
 
         await add_uof_result_to_store(executed_uow, uow_metadata, queue_client)
         q.task_done()
