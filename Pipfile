@@ -12,6 +12,7 @@ pylint = "*"
 black = "*"
 isort = "*"
 pre-commit = "*"
+freezegun = "*"
 
 [packages]
 pytask-io = {path = ".", editable = true}

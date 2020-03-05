@@ -157,6 +157,8 @@ class PyTaskIO:
         # stop event loop
         current_loop = asyncio.get_event_loop()
         current_loop.call_soon_threadsafe(current_loop.stop)
+        self.main_loop.call_soon_threadsafe(self.main_loop.stop)
+        
         self.loop_thread.join()
 
     def _run_event_loop(self) -> None:
