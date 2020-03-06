@@ -14,7 +14,7 @@ from pytask_io.task_queue import (
 from pytask_io.logger import logger
 from pytask_io.client import client
 from pytask_io.store import init_unit_of_work, get_uow_from_store
-
+from pytask_io.exceptions import NotReadyException
 
 class PyTaskIO:
     """
@@ -48,37 +48,7 @@ class PyTaskIO:
     #:     result = get_task(metadata)
     #:
     #:     # Stop PytaskIO completly (This will not effect any units of work that havent yet executed)
-    #:     pytask.stop()
-    #:
-    #: The connected queue client object. Use this object exactly as you would if you were referencing
-    #: the queue's client directly. Example::
-    #:
-    #:    # Example for default Redis queue pushing a task into the queue
-    #:    pytaskio = PytaskIO()
-    #:    results = pytaskio.queue_client.lpush("my_queue", my_task)
-    queue_client: redis.Redis
-
-    #: The `queue_store` is available to work with & can be accessed on the PyTaskIO instance
-    #: & all the available methods from the store framework used will be available on this object.
-    #: Foe example::
-    #:
-    #:    # Example fpr default Redis store setting a new key
-    #:    pytaskio = PytaskIO()
-    #:    pytaskio.queue_store.set('myfield', 'my_value')
-    queue_store: redis.Redis
-
-    #: The thread that the asyncio event loop runs in. This thread has been tagged with the name of
-    #: `event_loop`. The thread will die gracefully when PytaskIO calls `event_loop.join()` for you. If
-    #: you require custom handling of the `event_loop` thread, then you can access it directly using
-    #: the :class:`pytask_io.loop_thread` object. Example::
-    #:
-    #:    pytaskio = PytaskIO()
-    #:    pytaskio.loop_thread.is_alive() # check if the thread is still alive
-    loop_thread: Thread
-
-    #: The main loop that is used by PytaskIO. If you wish to handle some of the asyncio behavior of the
-    #: main loop, then you can access the asyncio object directly with :class:`pytask_io.main_loop`.
-    main_loop: asyncio.AbstractEventLoop
+    #:     pytask.stop() 
 
     #: The pole loop that is available for PytaskIO public methods such as :class:`pytask_io.poll_for_task`
     #: If you wish to handle some of the asyncio behavior of the pole loop, then you can access the asyncio
@@ -105,6 +75,81 @@ class PyTaskIO:
         self.store_db = kwargs.get("store_db") or self.store_db
         self.workers = kwargs.get("workers") or self.workers
 
+        self._queue_client = None
+        self._queue_store = None
+        self._loop_thread = None
+        self._main_loop = None
+    
+    @property
+    def queue_client(self) -> redis.Redis:
+        """
+        The connected queue client object. Use this object exactly as you would 
+        if you were referencing the queue's client directly. Example::
+        
+            # Example for default Redis queue pushing a task into the queue
+            pytaskio = PytaskIO()
+            results = pytaskio.queue_client.lpush("my_queue", my_task)
+        
+        :raises NotReadyException: Raised when trying to a property before `run()` is called.
+        :return: :class:`redis.Redis` client object.
+        :rtype: redis.Redis
+        """
+        if not self._queue_client:
+            raise NotReadyException()
+        return self._queue_client
+    
+    @property
+    def queue_store(self) -> redis.Redis:
+        """
+        The `queue_store` is available to work with & can be accessed on the PyTaskIO instance
+        & all the available methods from the store framework used will be available on this object.
+        Foe example::
+        
+           # Example fpr default Redis store setting a new key
+           pytaskio = PytaskIO()
+           pytaskio.queue_store.set('myfield', 'my_value')
+
+        :raises NotReadyException: Raised when trying to a property before `run()` is called.
+        :return: :class:`redis.Redis` store object.
+        :rtype: redis.Redis
+        """
+        if not self._queue_store:
+            raise NotReadyException()
+        return self._queue_store
+
+    @property
+    def loop_thread(self) -> Thread:
+        """
+        The thread that the asyncio event loop runs in. This thread has been tagged with the name of
+        `event_loop`. The thread will die gracefully when PytaskIO calls `event_loop.join()` for you. If
+        you require custom handling of the `event_loop` thread, then you can access it directly using
+        the :class:`pytask_io.loop_thread` object. Example::
+        
+           pytaskio = PytaskIO()
+           pytaskio.loop_thread.is_alive() # check if the thread is still alive
+        
+        :raises NotReadyException: Raised when trying to a property before `run()` is called.
+        :return: :class:`Thread` object.
+        :rtype: threading.Thread
+        """
+        if not self._loop_thread:
+            raise NotReadyException()
+        return self._loop_thread
+    
+    @property
+    def main_loop(self) -> asyncio.AbstractEventLoop:
+        """
+        The main loop that is used by PytaskIO. If you wish to handle some of the asyncio behavior of the
+        main loop, then you can access the asyncio object directly with :class:`pytask_io.main_loop`.
+
+        :raises NotReadyException: Raised when trying to a property before `run()` is called.
+        :return: :class:`asyncio.AbstractEventLoop` object.
+        :rtype: asyncio.AbstractEventLoop
+        """
+        if not self._main_loop:
+            raise NotReadyException()
+        return self._main_loop
+
     def run(self):
         """
         Starts an event loop on a new thread with a name of `event_loop`
@@ -116,9 +161,9 @@ class PyTaskIO:
 
         :return:
         """
-        self.queue_client = self._connect_to_store()
-        self.queue_store = self._connect_to_store()
-        self.loop_thread = Thread(
+        self._queue_client = self._connect_to_store()
+        self._queue_store = self._connect_to_store()
+        self._loop_thread = Thread(
             name="event_loop",
             target=self._run_event_loop,
         )
@@ -165,9 +210,9 @@ class PyTaskIO:
         """
         :return: None
         """
-        self.main_loop = asyncio.new_event_loop()
-        self.main_loop.create_task(client(self.queue_client, self.workers))
-        self.main_loop.run_forever()
+        self._main_loop = asyncio.new_event_loop()
+        self._main_loop.create_task(client(self.queue_client, self.workers))
+        self._main_loop.run_forever()
         logger.info("asyncIO event loop running")
 
     def add_task(self, unit_of_work: Callable, *args) -> Dict[str, Any]:

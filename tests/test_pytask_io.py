@@ -5,6 +5,7 @@ import time
 import pytest
 import redis
 from freezegun import freeze_time
+from pytask_io.exceptions import NotReadyException
 
 from pytask_io import PyTaskIO
 from pytask_io.client import client
@@ -36,10 +37,18 @@ class TestPyTaskIO:
 
     def test_init(self):
         """Test keywords assignment to attributes in __init__"""
-        assert self.pytask.store_host == "localhost"
-        assert self.pytask.store_port == 6379
-        assert self.pytask.store_db == 0
-        assert self.pytask.workers == 1
+        pytask = PyTaskIO(
+            store_host="localhost", store_port=6379, store_db=0, workers=1
+        )
+        assert pytask.store_host == "localhost"
+        assert pytask.store_port == 6379
+        assert pytask.store_db == 0
+        assert pytask.workers == 1
+
+        assert pytask._queue_client is None
+        assert pytask._queue_store is None
+        assert pytask._loop_thread is None
+        assert pytask._main_loop is None
 
     def test_init_defaults_fallback(self):
         """Ensure PyTaskIO fallbacks to defaults if no options are passed."""
@@ -60,6 +69,35 @@ class TestPyTaskIO:
         assert new_thread.daemon is True
         assert new_thread.name == "event_loop"
         assert new_thread._target == self.pytask._run_event_loop
+
+        assert isinstance(self.pytask._queue_client, redis.Redis)
+        assert isinstance(self.pytask._queue_store, redis.Redis)
+        assert isinstance(self.pytask._loop_thread, threading.Thread)
+    
+    def test_queue_client(self):
+        assert self.pytask.queue_client is self.pytask._queue_client
+
+        with pytest.raises(NotReadyException):
+            PyTaskIO().queue_client
+    
+    def test_queue_store(self):
+        assert self.pytask.queue_store is self.pytask._queue_store
+
+        with pytest.raises(NotReadyException):
+            PyTaskIO().queue_store
+    
+    def test_loop_thread(self):
+        assert self.pytask.loop_thread is self.pytask._loop_thread
+
+        with pytest.raises(NotReadyException):
+            PyTaskIO().loop_thread
+
+    def test_main_loop(self):
+        assert self.pytask.main_loop is self.pytask._main_loop
+
+        with pytest.raises(NotReadyException):
+            PyTaskIO().main_loop
+
 
     @freeze_time("1955-11-12 12:00:00")
     def test_add_task(self):
