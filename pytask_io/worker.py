@@ -20,7 +20,9 @@ async def worker(q: asyncio.Queue, queue_client):
         - Tasks are run asynchronously on a single asyncIO event loop.
     """
     while True:
+
         uow_metadata = await q.get()
+
         current_loop = asyncio.get_running_loop()
 
         # Execute the unit of work & pass in the args

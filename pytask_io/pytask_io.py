@@ -6,6 +6,7 @@ import asyncio
 from typing import List, Callable
 import redis
 from threading import Thread
+import threading
 from typing import Dict, Any, Union
 
 from pytask_io.task_queue import (
@@ -13,7 +14,9 @@ from pytask_io.task_queue import (
 )
 from pytask_io.logger import logger
 from pytask_io.client import client
-from pytask_io.store import init_unit_of_work, get_uow_from_store
+from pytask_io.store import init_unit_of_work, get_uow_from_store, _QUEUE_NAME
+from pytask_io.actions import QueueActions
+
 
 
 class PyTaskIO:
@@ -67,6 +70,8 @@ class PyTaskIO:
     #:    pytaskio.queue_store.set('myfield', 'my_value')
     queue_store: redis.Redis
 
+    _worker_queue: asyncio.Queue = None
+
     #: The thread that the asyncio event loop runs in. This thread has been tagged with the name of
     #: `event_loop`. The thread will die gracefully when PytaskIO calls `event_loop.join()` for you. If
     #: you require custom handling of the `event_loop` thread, then you can access it directly using
@@ -78,7 +83,7 @@ class PyTaskIO:
 
     #: The main loop that is used by PytaskIO. If you wish to handle some of the asyncio behavior of the
     #: main loop, then you can access the asyncio object directly with :class:`pytask_io.main_loop`.
-    main_loop: asyncio.AbstractEventLoop
+    main_loop: asyncio.AbstractEventLoop = None
 
     #: The pole loop that is available for PytaskIO public methods such as :class:`pytask_io.poll_for_task`
     #: If you wish to handle some of the asyncio behavior of the pole loop, then you can access the asyncio
@@ -124,6 +129,7 @@ class PyTaskIO:
         )
         self.loop_thread.daemon = True
         self.loop_thread.start()
+        logger.info("PyTaskIO running...")
 
     def _connect_to_store(self) -> redis.Redis:
         """
@@ -154,21 +160,16 @@ class PyTaskIO:
 
         :return: None
         """
-        # stop event loop
-        current_loop = asyncio.get_event_loop()
-        current_loop.call_soon_threadsafe(current_loop.stop)
-        self.main_loop.call_soon_threadsafe(self.main_loop.stop)
-        
-        self.loop_thread.join()
+        self.queue_client.lpush(_QUEUE_NAME, QueueActions.STOP.name)
 
-    def _run_event_loop(self) -> None:
+    def _run_event_loop(self, action: str = None) -> None:
         """
         :return: None
         """
         self.main_loop = asyncio.new_event_loop()
-        self.main_loop.create_task(client(self.queue_client, self.workers))
+        self._worker_queue = asyncio.Queue(loop=self.main_loop)
+        self.main_loop.create_task(client(self._worker_queue, self.queue_client, self.workers))
         self.main_loop.run_forever()
-        logger.info("asyncIO event loop running")
 
     def add_task(self, unit_of_work: Callable, *args) -> Dict[str, Any]:
         """
