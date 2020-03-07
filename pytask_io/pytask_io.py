@@ -3,20 +3,22 @@ Pytask IO Class
 ===============
 """
 import asyncio
-from typing import List, Callable
+from typing import Callable
 import redis
 from threading import Thread
-import threading
 from typing import Dict, Any, Union
 
 from pytask_io.task_queue import (
     poll_for_store_results,
 )
+from pytask_io.store import (
+    init_unit_of_work,
+    get_uow_from_store,
+    push_action_name,
+)
 from pytask_io.logger import logger
 from pytask_io.client import client
-from pytask_io.store import init_unit_of_work, get_uow_from_store, _QUEUE_NAME
 from pytask_io.actions import QueueActions
-
 
 
 class PyTaskIO:
@@ -123,6 +125,7 @@ class PyTaskIO:
         """
         self.queue_client = self._connect_to_store()
         self.queue_store = self._connect_to_store()
+        _ = push_action_name(self.queue_client, QueueActions.START.name)
         self.loop_thread = Thread(
             name="event_loop",
             target=self._run_event_loop,
@@ -143,9 +146,9 @@ class PyTaskIO:
             db=self.store_db
         )
 
-    def stop(self) -> None:
+    def stop(self) -> int:
         """
-        Method to elegantly stop the asyncio event loop & join the `event_loop` thread.
+        Method to elegantly stop the asyncio event loop & any associated threads.
         This method will only be executed when all active task have finished executing.
         If there are any pending tasks left in the clients queue then these can be executed
         once PytaskIO is run again.
@@ -156,11 +159,13 @@ class PyTaskIO:
             try:
                 metadata = pytask.add_task(send_email, title, body)
             except RunTimeError:
-                pytaskio.stop()
+                res = pytaskio.stop()
+                print(res) # index of queue work item
 
-        :return: None
+        :return: The queue index
         """
-        self.queue_client.lpush(_QUEUE_NAME, QueueActions.STOP.name)
+        res = push_action_name(self.queue_client, QueueActions.STOP.name)
+        return res
 
     def _run_event_loop(self, action: str = None) -> None:
         """
