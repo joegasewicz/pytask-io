@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="pytask-io",
-    version="0.0.8",
+    version="0.0.9",
     description="An asynchronous Tasks Library using asyncio",
     packages=['pytask_io'],
     install_requires=[
