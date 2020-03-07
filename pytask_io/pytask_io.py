@@ -7,6 +7,8 @@ from typing import Callable
 import redis
 from threading import Thread
 from typing import Dict, Any, Union
+import threading
+import time
 
 from pytask_io.task_queue import (
     poll_for_store_results,
@@ -165,6 +167,8 @@ class PyTaskIO:
         :return: The queue index
         """
         res = push_action_name(self.queue_client, QueueActions.STOP.name)
+        while any(t.is_alive() and t.getName() == "event_loop" for t in threading.enumerate()):
+            time.sleep(0.25)
         return res
 
     def _run_event_loop(self, action: str = None) -> None:

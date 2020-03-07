@@ -1,6 +1,7 @@
 import asyncio
 import redis
 from typing import Callable, Any, List
+import threading
 
 from pytask_io.worker import worker
 from pytask_io.utils import get_task_from_queue_client, deserialize_task
@@ -21,8 +22,12 @@ async def client(worker_queue: asyncio.Queue, queue_client: redis.Redis, workers
     """
     queue = worker_queue
     next_task = await get_task_from_queue_client(queue_client)
-    action_name: str = next_task[1].decode("utf-8")
-    logger.debug(f"QueueAction name: {action_name}")
+    action_name = ""
+    try:
+        action_name: str = next_task[1].decode("utf-8")
+        logger.debug(f"QueueAction name: {action_name}")
+    except UnicodeDecodeError:
+        pass
 
     if action_name == QueueActions.START.name:
         for i in range(workers_required):
