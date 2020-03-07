@@ -33,7 +33,6 @@ class TestPyTaskIO:
             loop.close()
         self.pytask.stop()
 
-
     def test_init(self):
         """Test keywords assignment to attributes in __init__"""
         assert self.pytask.store_host == "localhost"
@@ -64,7 +63,6 @@ class TestPyTaskIO:
     @freeze_time("1955-11-12 12:00:00")
     def test_add_task(self):
         """Ensure a task is correctly added and result can be fetched for queue storage."""
-        
 
         result = self.pytask.add_task(send_email, "Hello")
 
@@ -127,7 +125,6 @@ class TestPyTaskIO:
             "task_index": 0,
         }
 
-        
         task_meta = {
             "list_name": "task_result",
             "task_index": 0,
@@ -139,7 +136,6 @@ class TestPyTaskIO:
         def send_email_quick(msg):
             return msg
 
-        
         metadata = self.pytask.add_task(send_email_quick, "Hello Joe 1")
         time.sleep(3)
 
@@ -151,7 +147,7 @@ class TestPyTaskIO:
         assert result["serialized_result"] == "Hello Joe 1"
 
     def test_add_unit_of_work(self):
-        
+
         meta = self.pytask.add_task(send_email, "Hello world!")
         # TODO: Fix this, `brpop` is blocking as key `tasks` is not present.
         # assert serialize_unit_of_work(send_email, "Hello world!") in self.r.brpop("tasks")

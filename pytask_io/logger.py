@@ -1,4 +1,19 @@
 import logging
+import os
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+
+def set_log_level():
+    """
+    Example::
+        export PYTASKIO_DEBUG=1
+    :return:
+    """
+    PYTASKIO_DEBUG: str = os.getenv("PYTASKIO_DEBUG")
+    if int(PYTASKIO_DEBUG) == 1:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
+    return logging.getLogger(__name__)
+
+
+logger = set_log_level()

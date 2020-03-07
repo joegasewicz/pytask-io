@@ -8,7 +8,7 @@ from pytask_io.utils import (
     serialize_unit_of_work,
     deserialize_store_data_sync,
 )
-
+from pytask_io.actions import QueueActions
 
 _QUEUE_NAME = "pytaskio_queue"
 
@@ -128,3 +128,13 @@ async def add_uof_result_to_store(executed_uow: Any, uow_metadata: Dict[str, Any
     update_success = store.set(uow_metadata["store_name"], serialized_metadata)
     if not update_success:
         logger.error("PyTaskIO Error: Store was unsuccessful updating meta for unit of work.")
+
+
+def push_action_name(q: redis.Redis, action: str) -> int:
+    """
+    :param q: redis.Redis
+    :param action: QueueAction prop
+    :return:
+    """
+    res = q.lpush(_QUEUE_NAME, action)
+    return res

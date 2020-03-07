@@ -4,7 +4,7 @@ import dill
 from typing import List, Any, Tuple, Callable
 from datetime import datetime
 from warnings import warn
-import concurrent.futures
+
 
 def serialize_unit_of_work(unit_of_work: Any, *args) -> bytes:
     """

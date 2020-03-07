@@ -3,17 +3,24 @@ Pytask IO Class
 ===============
 """
 import asyncio
-from typing import List, Callable
+from typing import Callable
 import redis
 from threading import Thread
 from typing import Dict, Any, Union
+import threading
+import time
 
 from pytask_io.task_queue import (
     poll_for_store_results,
 )
+from pytask_io.store import (
+    init_unit_of_work,
+    get_uow_from_store,
+    push_action_name,
+)
 from pytask_io.logger import logger
 from pytask_io.client import client
-from pytask_io.store import init_unit_of_work, get_uow_from_store
+from pytask_io.actions import QueueActions
 
 
 class PyTaskIO:
@@ -67,6 +74,8 @@ class PyTaskIO:
     #:    pytaskio.queue_store.set('myfield', 'my_value')
     queue_store: redis.Redis
 
+    _worker_queue: asyncio.Queue = None
+
     #: The thread that the asyncio event loop runs in. This thread has been tagged with the name of
     #: `event_loop`. The thread will die gracefully when PytaskIO calls `event_loop.join()` for you. If
     #: you require custom handling of the `event_loop` thread, then you can access it directly using
@@ -78,7 +87,7 @@ class PyTaskIO:
 
     #: The main loop that is used by PytaskIO. If you wish to handle some of the asyncio behavior of the
     #: main loop, then you can access the asyncio object directly with :class:`pytask_io.main_loop`.
-    main_loop: asyncio.AbstractEventLoop
+    main_loop: asyncio.AbstractEventLoop = None
 
     #: The pole loop that is available for PytaskIO public methods such as :class:`pytask_io.poll_for_task`
     #: If you wish to handle some of the asyncio behavior of the pole loop, then you can access the asyncio
@@ -118,12 +127,14 @@ class PyTaskIO:
         """
         self.queue_client = self._connect_to_store()
         self.queue_store = self._connect_to_store()
+        _ = push_action_name(self.queue_client, QueueActions.START.name)
         self.loop_thread = Thread(
             name="event_loop",
             target=self._run_event_loop,
         )
         self.loop_thread.daemon = True
         self.loop_thread.start()
+        logger.info("PyTaskIO running...")
 
     def _connect_to_store(self) -> redis.Redis:
         """
@@ -137,9 +148,9 @@ class PyTaskIO:
             db=self.store_db
         )
 
-    def stop(self) -> None:
+    def stop(self) -> int:
         """
-        Method to elegantly stop the asyncio event loop & join the `event_loop` thread.
+        Method to elegantly stop the asyncio event loop & any associated threads.
         This method will only be executed when all active task have finished executing.
         If there are any pending tasks left in the clients queue then these can be executed
         once PytaskIO is run again.
@@ -150,25 +161,24 @@ class PyTaskIO:
             try:
                 metadata = pytask.add_task(send_email, title, body)
             except RunTimeError:
-                pytaskio.stop()
+                res = pytaskio.stop()
+                print(res) # index of queue work item
 
-        :return: None
+        :return: The queue index
         """
-        # stop event loop
-        current_loop = asyncio.get_event_loop()
-        current_loop.call_soon_threadsafe(current_loop.stop)
-        self.main_loop.call_soon_threadsafe(self.main_loop.stop)
-        
-        self.loop_thread.join()
+        res = push_action_name(self.queue_client, QueueActions.STOP.name)
+        while any(t.is_alive() and t.getName() == "event_loop" for t in threading.enumerate()):
+            time.sleep(0.25)
+        return res
 
-    def _run_event_loop(self) -> None:
+    def _run_event_loop(self, action: str = None) -> None:
         """
         :return: None
         """
         self.main_loop = asyncio.new_event_loop()
-        self.main_loop.create_task(client(self.queue_client, self.workers))
+        self._worker_queue = asyncio.Queue(loop=self.main_loop)
+        self.main_loop.create_task(client(self._worker_queue, self.queue_client, self.workers))
         self.main_loop.run_forever()
-        logger.info("asyncIO event loop running")
 
     def add_task(self, unit_of_work: Callable, *args) -> Dict[str, Any]:
         """
