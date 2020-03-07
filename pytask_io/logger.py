@@ -10,7 +10,6 @@ def set_log_level():
     """
     PYTASKIO_DEBUG: str = os.getenv("PYTASKIO_DEBUG")
     if int(PYTASKIO_DEBUG) == 1:
-        print(f"WORKS ")
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.INFO)
