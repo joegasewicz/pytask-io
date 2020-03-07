@@ -8,7 +8,7 @@ def set_log_level():
         export PYTASKIO_DEBUG=1
     :return:
     """
-    PYTASKIO_DEBUG: str = os.getenv("PYTASKIO_DEBUG")
+    PYTASKIO_DEBUG: str = os.getenv("PYTASKIO_DEBUG") or "0"
     if int(PYTASKIO_DEBUG) == 1:
         logging.basicConfig(level=logging.DEBUG)
     else:
