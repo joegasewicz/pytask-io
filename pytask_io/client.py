@@ -25,15 +25,13 @@ async def client(worker_queue: asyncio.Queue, queue_client: redis.Redis, workers
     logger.debug(f"QueueAction name: {action_name}")
 
     if action_name == QueueActions.START.name:
-        # Create `3` workers tasks to process the queue concurrently
         for i in range(workers_required):
             task = asyncio.create_task(worker(queue, queue_client))
             tasks.append(task)
-        # Wait until queue is fully processed
-        await queue.join()
         await client(worker_queue, queue_client, workers_required)
 
     elif action_name == QueueActions.STOP.name:
+        await queue.join()
         for task in tasks:
             task.cancel()
         # Wait until all worker tasks are cancelled
