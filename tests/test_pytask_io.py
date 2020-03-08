@@ -76,28 +76,6 @@ class TestPyTaskIO:
     def test_queue_client(self):
         assert self.pytask.queue_client is self.pytask._queue_client
 
-        with pytest.raises(NotReadyException):
-            PyTaskIO().queue_client
-    
-    def test_queue_store(self):
-        assert self.pytask.queue_store is self.pytask._queue_store
-
-        with pytest.raises(NotReadyException):
-            PyTaskIO().queue_store
-    
-    def test_loop_thread(self):
-        assert self.pytask.loop_thread is self.pytask._loop_thread
-
-        with pytest.raises(NotReadyException):
-            PyTaskIO().loop_thread
-
-    def test_main_loop(self):
-        assert self.pytask.main_loop is self.pytask._main_loop
-
-        with pytest.raises(NotReadyException):
-            PyTaskIO().main_loop
-
-
     @freeze_time("1955-11-12 12:00:00")
     def test_add_task(self):
         """Ensure a task is correctly added and result can be fetched for queue storage."""
