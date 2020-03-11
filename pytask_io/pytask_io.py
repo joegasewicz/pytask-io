@@ -114,6 +114,16 @@ class PyTaskIO:
         self.store_db = kwargs.get("store_db") or self.store_db
         self.workers = kwargs.get("workers") or self.workers
 
+    def init(self, **kwargs):
+        """
+        :param kwargs:
+        :return:
+        """
+        self.store_host = kwargs.get("store_host") or self.store_host
+        self.store_port = kwargs.get("store_port") or self.store_port
+        self.store_db = kwargs.get("store_db") or self.store_db
+        self.workers = kwargs.get("workers") or self.workers
+
     def run(self):
         """
         Starts an event loop on a new thread with a name of `event_loop`
