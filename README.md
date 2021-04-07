@@ -2,6 +2,9 @@
 ![Read the Docs](https://img.shields.io/readthedocs/pytask-io)
 ![GitHub](https://img.shields.io/github/license/joegasewicz/pytask_io)
 
+## Now Archived pending a rewrite...
+
+
 # Pytask IO
 
 
