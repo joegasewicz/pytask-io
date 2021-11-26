@@ -7,7 +7,7 @@
 
 Asynchronous Tasks Library using asyncio
 
-An Asyncio based task queue that is designed to be super easy the use!
+An Asyncio based task queue that is designed to be super easy to use!
 
 Read the docs: [Documentation](https://pytask-io.readthedocs.io/en/latest/)
 
