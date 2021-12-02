@@ -12,3 +12,4 @@
 -   Improve `Pipfile` & `setup.py` to allow in-place editing using pipenv.
 
 ## Unreleased
+-   Update pipenv to python 3.10 [Issue #74](https://github.com/joegasewicz/pytask-io/issues/74)
