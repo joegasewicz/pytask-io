@@ -12,3 +12,9 @@
 -   Improve `Pipfile` & `setup.py` to allow in-place editing using pipenv.
 
 ## Unreleased
+- Update pipenv to python 3.10 [Issue #74](https://github.com/joegasewicz/pytask-io/issues/74)
+- TestPyTaskIO::test_init unit test fails [Issue #39](https://github.com/joegasewicz/pytask-io/issues/39)
+- TestPyTaskIO::test_worker unit test fails [Issue #41](https://github.com/joegasewicz/pytask-io/issues/41)
+- Mixed licenses [Issue #57](https://github.com/joegasewicz/pytask-io/issues/57)
+- TestPyTaskIO::test_add_unit_of_work unit test fails [Issue #38](https://github.com/joegasewicz/pytask-io/issues/38)
+- Fix test_add_task [Issue #24](https://github.com/joegasewicz/pytask-io/issues/24)

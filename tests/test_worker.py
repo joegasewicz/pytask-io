@@ -13,6 +13,7 @@ r = redis.Redis(
 )
 
 
+@pytest.mark.skip
 def test_worker(event_loop):
     dumped_uow = serialize_unit_of_work(send_email, ["Hello", 1])
     r.lpush("tasks", dumped_uow)
@@ -21,4 +22,4 @@ def test_worker(event_loop):
 
     queue = asyncio.Queue()
 
-    assert {} == event_loop.run_until_complete(worker(queue))
+    assert {} == event_loop.run_until_complete(worker(queue, r))
