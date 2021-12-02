@@ -63,7 +63,7 @@ class PyTaskIO:
     #:    # Example for default Redis queue pushing a task into the queue
     #:    pytaskio = PytaskIO()
     #:    results = pytaskio.queue_client.lpush("my_queue", my_task)
-    queue_client: redis.Redis
+    queue_client: redis.Redis = None
 
     #: The `queue_store` is available to work with & can be accessed on the PyTaskIO instance
     #: & all the available methods from the store framework used will be available on this object.
@@ -72,7 +72,7 @@ class PyTaskIO:
     #:    # Example fpr default Redis store setting a new key
     #:    pytaskio = PytaskIO()
     #:    pytaskio.queue_store.set('myfield', 'my_value')
-    queue_store: redis.Redis
+    queue_store: redis.Redis = None
 
     _worker_queue: asyncio.Queue = None
 
@@ -83,7 +83,7 @@ class PyTaskIO:
     #:
     #:    pytaskio = PytaskIO()
     #:    pytaskio.loop_thread.is_alive() # check if the thread is still alive
-    loop_thread: Thread
+    loop_thread: Thread = None
 
     #: The main loop that is used by PytaskIO. If you wish to handle some of the asyncio behavior of the
     #: main loop, then you can access the asyncio object directly with :class:`pytask_io.main_loop`.

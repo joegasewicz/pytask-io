@@ -4,7 +4,6 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-pytest = "*"
 Sphinx = "*"
 pampy = "*"
 importlib-metadata = "*"
@@ -13,9 +12,14 @@ black = "*"
 isort = "*"
 pre-commit = "*"
 freezegun = "*"
+pytest = "*"
 
 [packages]
-pytask-io = {path = ".", editable = true}
+dill = "*"
+redis = "*"
 
 [pipenv]
 allow_prereleases = true
+
+[requires]
+python_version = "3.10"
