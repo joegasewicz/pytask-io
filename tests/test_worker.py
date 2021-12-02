@@ -4,7 +4,6 @@ import redis
 
 from pytask_io.utils import serialize_unit_of_work
 from tests.mock_uow import send_email
-from tests.fixtures import event_loop
 from pytask_io.worker import worker
 
 r = redis.Redis(
@@ -14,6 +13,7 @@ r = redis.Redis(
 )
 
 
+@pytest.mark.skip
 def test_worker(event_loop):
     dumped_uow = serialize_unit_of_work(send_email, ["Hello", 1])
     r.lpush("tasks", dumped_uow)
@@ -21,5 +21,5 @@ def test_worker(event_loop):
     r.lpush("tasks", dumped_uow)
 
     queue = asyncio.Queue()
-    event_loop.run_until_complete(worker(queue, r))
+
     assert {} == event_loop.run_until_complete(worker(queue, r))

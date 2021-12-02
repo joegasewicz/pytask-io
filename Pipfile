@@ -13,6 +13,7 @@ isort = "*"
 pre-commit = "*"
 freezegun = "*"
 pytest = "*"
+pytest-asyncio = "*"
 
 [packages]
 dill = "*"
