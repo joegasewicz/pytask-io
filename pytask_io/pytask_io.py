@@ -186,7 +186,7 @@ class PyTaskIO:
         :return: None
         """
         self.main_loop = asyncio.new_event_loop()
-        self._worker_queue = asyncio.Queue(loop=self.main_loop)
+        self._worker_queue = asyncio.Queue()
         self.main_loop.create_task(client(self._worker_queue, self.queue_client, self.workers))
         self.main_loop.run_forever()
 
