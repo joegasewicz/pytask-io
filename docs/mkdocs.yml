@@ -1,0 +1,11 @@
+site_name: Forest MQ
+
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: green
+    accent: limer
+    toggle:
+      icon: material/weather-night
+      name: Switch to light mode

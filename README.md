@@ -1,34 +1,32 @@
-![PyPI](https://img.shields.io/pypi/v/pytask-io)
-![Read the Docs](https://img.shields.io/readthedocs/pytask-io)
-![GitHub](https://img.shields.io/github/license/joegasewicz/pytask_io)
+[![Deploy docs to GitHub Pages](https://github.com/joegasewicz/forestmq/actions/workflows/pages.yml/badge.svg)](https://github.com/joegasewicz/forestmq/actions/workflows/pages.yml)
 
-*Work in progress, call back soon...*
+![ForestMQ](docs/docs/images/fmq_logo.png?raw=true "ForestMQ")
+
+ForestMQ is a rewrite of my original queue ([ForestMQ](https://github.com/joegasewicz/forestmq-old)) but with added features.
+
+⚠️ Production ready in v1.0.0, ready to use in v0.1.0.
+
+## Project Status
+👷‍♂️In development...
+
+### Run with Docker
+[Official Docker hub account for ForestMQ](https://hub.docker.com/u/forestmq)
+
+### Support
+See [Contact](#contact)
 
 
-Read the docs: [Documentation](https://pytask-io.readthedocs.io/en/latest/)
+## Contributions
+I will be taking contributions in the near future.
 
-![PyTask IO](assets/Group.png?raw=true "Title")
 
-## Install
+## Docs
+Build & run the docs locally.
 ```bash
-pip install pytask-io
-
-docker run redis  # Rabbit MQ coming soon...
-
+cd docs
+pipenv shell && pipenv install --dev
+pipenv run mkdocs build
 ```
 
-
-### Usage
-
-
-## Authors
-
-* **joegasewicz** - *Initial work* - [@joegasewicz](https://twitter.com/joegasewicz)
-
-## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
-Please make sure to update tests as appropriate.
-
-## License
-[MIT](https://choosealicense.com/licenses/mit/)
+## Contact
+[josefdigital.com](https://josefdigital.com)
