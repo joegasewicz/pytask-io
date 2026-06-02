@@ -2,10 +2,8 @@
 ![Read the Docs](https://img.shields.io/readthedocs/pytask-io)
 ![GitHub](https://img.shields.io/github/license/joegasewicz/pytask_io)
 
+*Work in progress, call back soon...*
 
-Asynchronous Tasks Library using asyncio
-
-An Asyncio based task queue that is designed to be super easy to use!
 
 Read the docs: [Documentation](https://pytask-io.readthedocs.io/en/latest/)
 
