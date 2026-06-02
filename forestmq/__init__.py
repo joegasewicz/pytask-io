@@ -1,6 +1,6 @@
-from forestmq.queue import Queue
+from tcp import TCP
 
 
 if __name__ == "__main__":
-   q = Queue()
-   q.run()
+   server = TCP()
+   server.serve()
