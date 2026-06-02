@@ -1,4 +1,4 @@
-class TCP:
+class Worker:
 
     def __init__(self):
         pass

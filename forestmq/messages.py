@@ -1,4 +1,4 @@
-class TCP:
+class Message:
 
     def __init__(self):
         pass
