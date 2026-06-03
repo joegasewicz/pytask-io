@@ -2,6 +2,13 @@ import asyncio
 import json
 
 from forestmq.logger import log
+from forestmq.http import (
+    Http,
+    Response,
+    Request,
+    Status,
+)
+from forestmq.router import Router
 
 
 class TCP:
@@ -9,25 +16,22 @@ class TCP:
     def __init__(self, host: str, port: int):
         self.host = host
         self.port = port
+        self.http = Http(
+            request=Request(),
+            response=Response(),
+        )
 
     async def handler(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
         request_line = await reader.readline()
         request_line_str = request_line.decode("iso-8859-1")
         method, path, version = request_line_str.rstrip("\r\n").split(" ", 2)
 
-        json_data = {
-            "status": "OK",
-        }
-        body = json.dumps(json_data).encode("utf-8")
-        body_len = len(body)
-        headers = "HTTP/1.1 200 OK\r\n"
-        headers += "Server: ForestMQ\r\n"
-        headers += "Content-Type: application/json\r\n"
-        headers += f"Content-Length: {body_len}\r\n"
-        headers += "Connection: close\r\n"
-        headers += "\r\n"
+        router = Router(path=path, method=method)
+        data, status = router.route()
 
-        writer.write(headers.encode("utf-8") + body)
+        headers = self.http.set_headers(status_code=status, body=data)
+
+        writer.write(headers)
         writer.close()
         await writer.wait_closed()
 
