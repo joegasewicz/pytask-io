@@ -1,22 +1,16 @@
 [project]
-name = "forestmq"
-version = "0.0.1"
+name = "client"
+version = "0.1.0"
 description = ""
 authors = [
     {name = "joegasewicz",email = "joegasewicz@users.noreply.github.com"}
 ]
-license = "MIT"
-readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "forestmq @ file:///Users/joegasewicz/PycharmProjects/forestmq"
 ]
 
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-[dependency-groups]
-dev = [
-    "pytest (>=9.0.3,<10.0.0)"
-]

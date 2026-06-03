@@ -1,14 +1,13 @@
 import asyncio
-import json
 
 from forestmq.logger import log
 from forestmq.http import (
-    Http,
+    BaseHttp,
     Response,
     Request,
-    Status,
 )
 from forestmq.router import Router
+from forestmq.protocol import Protocol
 
 
 class TCP:
@@ -16,20 +15,29 @@ class TCP:
     def __init__(self, host: str, port: int):
         self.host = host
         self.port = port
-        self.http = Http(
+        self.http = BaseHttp(
             request=Request(),
             response=Response(),
         )
 
+
     async def handler(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
         request_line = await reader.readline()
-        request_line_str = request_line.decode("iso-8859-1")
-        method, path, version = request_line_str.rstrip("\r\n").split(" ", 2)
+        headers = "".encode("utf-8")
 
-        router = Router(path=path, method=method)
-        data, status = router.route()
+        # Implement FMQP
+        protocol = Protocol()
 
-        headers = self.http.set_headers(status_code=status, body=data)
+        if protocol.is_fmqp():
+            headers = b""
+
+        else:
+            # ELSE implement Http
+            request_line_str = request_line.decode("iso-8859-1")
+            method, path, version = request_line_str.rstrip("\r\n").split(" ", 2)
+            router = Router(path=path, method=method)
+            data, status = router.route()
+            headers = self.http.set_headers(status_code=status, body=data)
 
         writer.write(headers)
         writer.close()
