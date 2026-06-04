@@ -3,7 +3,7 @@ from forestmq.http.request import Request
 
 
 
-class Http:
+class BaseHttp:
 
     headers: str = None
 

@@ -5,13 +5,11 @@ with open("README.md", "r") as fh:
 
 
 setup(
-    name="pytask-io",
-    version="0.0.10",
-    description="An asynchronous Tasks Library using asyncio",
+    name="forestmq",
+    version="0.0.1",
+    description="Python Async Queue",
     packages=['forestmq'],
     install_requires=[
-        'redis>=3.3.11,<5.0.0',
-        'dill>=0.3.1.1,<0.4.0.0',   
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -21,7 +19,7 @@ setup(
     ],
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/joegasewicz/pytask_io",
+    url="https://github.com/joegasewicz/forestmq",
     author="Joe Gasewicz",
     author_email="joegasewicz@gmail.com",
 )
