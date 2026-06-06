@@ -1,4 +1,4 @@
-from forestmq.client import FMQPClient
+from volk.client import FMQPClient
 
 
 if __name__ == "__main__":
