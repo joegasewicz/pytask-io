@@ -1,6 +1,6 @@
 [project]
-name = "forestmq"
-version = "0.0.1"
+name = "volk"
+version = "0.0.5"
 description = ""
 authors = [
     {name = "joegasewicz",email = "joegasewicz@users.noreply.github.com"}
